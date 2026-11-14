@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package payment.auth.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "payment-api/api/auth/v1;authv1";
+
+service AuthService {
+  rpc WechatLogin(WechatLoginRequest) returns (WechatLoginResponse) {
+    option (google.api.http) = {
+      post: "/v1/auth/wechat/login"
+      body: "*"
+    };
+  }
+}
+
+message WechatLoginRequest {
+  // 小程序 wx.login 返回的临时登录 code。
+  string code = 1;
+}
+
+message WechatLoginResponse {
+  string openid = 1;
+}

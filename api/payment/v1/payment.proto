@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package payment.payment.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "payment-api/api/payment/v1;paymentv1";
+
+service PaymentService {
+  rpc CreateOrder(CreateOrderReq) returns (CreateOrderResp) {}
+  rpc WxPayNotify(WxPayNotifyReq) returns (WxPayNotifyResp) {} // 微信支付回调
+}
+message WxPayNotifyReq {}
+
+message WxPayNotifyResp {}
+
+message CreateOrderReq {
+  string order_no = 1;    //  业务订单号
+  string description = 2; //  订单描述
+  float  amount = 3;      //  订单金额 单位：元 (保留两位小数)
+  string openid = 4;      //  用户标识,小程序下单需要
+  string attach = 5;      //  附加数据（可选）
+  string trade_type = 6;  //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
+
+
+
+  string channel = 7;      //  渠道（可选) 默认微信 wechat
+  string merchant_account = 8; //  商户账号
+  string payer_client_ip = 9; //  用户终端 IP，H5 必填
+  string h5_type = 10;        //  H5 场景类型，Wap、iOS、Android
+}
+
+message CreateOrderResp {
+  string out_trade_no = 1; //  商户订单号
+  string trade_type = 2;   // 支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
+  google.protobuf.Struct pay_params = 3; //  支付参数
+}
+
+message JSAPIPayParams {
+  string prepay_id = 1 [json_name = "prepay_id"];
+  string app_id = 2 [json_name = "appId"];
+  // 秒级 Unix 时间戳，以字符串返回。
+  string time_stamp = 3 [json_name = "timeStamp"];
+  string nonce_str = 4 [json_name = "nonceStr"];
+  // 格式为 prepay_id=微信返回的预支付交易会话标识。
+  string package = 5;
+  string sign_type = 6 [json_name = "signType"];
+  string pay_sign = 7 [json_name = "paySign"];
+}
+
+message NativePayParams {
+  string code_url = 1 [json_name = "code_url"]; //  二维码链接
+}
+
+message H5PayParams {
+  string h5_url = 1 [json_name = "h5_url"]; //  H5支付链接
+}
+
+// APP 调起支付参数。
+message AppPayParams {
+  // APP 下单时传入的应用 ID。
+  string app_id = 1 [json_name = "appId"];
+  // APP 下单时传入的商户号 mchid。
+  string partner_id = 2 [json_name = "partnerId"];
+  // APP 下单返回的预支付交易会话标识。
+  string prepay_id = 3 [json_name = "prepayId"];
+  // 固定值 Sign=WXPay，iOS 调起支付时映射到 package 字段。
+  string package_value = 4 [json_name = "packageValue"];
+  // 随机字符串，最长 32 位。
+  string nonce_str = 5 [json_name = "nonceStr"];
+  // 秒级 Unix 时间戳，以字符串返回。
+  string time_stamp = 6 [json_name = "timeStamp"];
+  // 使用 appId、timeStamp、nonceStr、prepayId 和商户私钥生成的 RSA 签名。
+  string sign = 7;
+}

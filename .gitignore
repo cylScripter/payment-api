@@ -1,0 +1,12 @@
+/bin/
+.env
+*.pem
+*.p12
+*.log
+.DS_Store
+.idea/*
+.vscode/*
+.idea/
+.claude
+.gitnexus
+/configs/
