@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	github.com/cloudwego/kitex v0.16.4
+	github.com/douyinpay/douyinpay-go v1.0.9
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-viper/mapstructure/v2 v2.4.0
@@ -49,6 +50,7 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
+	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.9.2-0.20260911210157-d46ac2e02a79 // indirect

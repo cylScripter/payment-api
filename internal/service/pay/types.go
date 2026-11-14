@@ -21,6 +21,8 @@ type Order struct {
 	RequestNo     string
 	Channel       string
 	MerchantNo    string
+	AppID         string
+	NotifyURL     string
 	ChannelConfig models.PayMerchantChannel
 	Response      *paymentv1.CreateOrderResp // 已有订单的统一响应，由幂等检查填充。
 }

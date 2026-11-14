@@ -121,31 +121,28 @@ func (c *CreateOrderHandler) BuildReq() error {
 }
 
 func (c *CreateOrderHandler) SavePayment(ctx context.Context) error {
-	channel := c.Order.ChannelConfig
-	cfg := channel.WeChatPayConfig()
-	if appID := cfg.AppIDs[c.Order.Request.TradeType]; appID != "" {
-		cfg.AppID = appID
-	}
-	err := c.mysql.ToOrder(&models.PayOrder{
-		PayNo:           c.payNo,
-		BizOrderNo:      c.Order.Request.OrderNo,
-		Channel:         c.Order.Channel,
-		TotalAmount:     helpers.YuanToFen(c.Order.Request.Amount),
+	order := c.Order
+	req := order.Request
+	payment := &models.PayOrder{
+		PayNo:           order.PayNo,
+		BizOrderNo:      req.OrderNo,
+		Channel:         order.Channel,
+		TotalAmount:     helpers.YuanToFen(req.Amount),
 		Currency:        "CNY",
-		ClientIP:        c.Order.Request.PayerClientIp,
-		NotifyURL:       cfg.NotifyUrl,
+		ClientIP:        req.PayerClientIp,
+		NotifyURL:       order.NotifyURL,
 		RawRequest:      c.payer.GetPayReq(),
 		MerchantAccount: c.account,
-		MerchantNo:      c.Order.MerchantNo,
-		AppID:           cfg.AppID,
+		MerchantNo:      order.MerchantNo,
+		AppID:           order.AppID,
 		Status:          models.PayStatusPending,
-		Subject:         c.Order.Request.Description,
+		Subject:         req.Description,
 		Version:         1,
 		ExpireTime:      time.Now(),
-		OpenID:          c.Order.Request.Openid,
-	})
-	if err != nil {
-		return errors.New("保存订单失败")
+		OpenID:          req.Openid,
+	}
+	if err := c.mysql.ToOrder(ctx, payment); err != nil {
+		return fmt.Errorf("保存订单失败: %w", err)
 	}
 	return nil
 }

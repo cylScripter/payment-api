@@ -22,6 +22,78 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type WxPayNotifyReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WxPayNotifyReq) Reset() {
+	*x = WxPayNotifyReq{}
+	mi := &file_api_payment_v1_payment_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WxPayNotifyReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WxPayNotifyReq) ProtoMessage() {}
+
+func (x *WxPayNotifyReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_payment_v1_payment_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WxPayNotifyReq.ProtoReflect.Descriptor instead.
+func (*WxPayNotifyReq) Descriptor() ([]byte, []int) {
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{0}
+}
+
+type WxPayNotifyResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WxPayNotifyResp) Reset() {
+	*x = WxPayNotifyResp{}
+	mi := &file_api_payment_v1_payment_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WxPayNotifyResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WxPayNotifyResp) ProtoMessage() {}
+
+func (x *WxPayNotifyResp) ProtoReflect() protoreflect.Message {
+	mi := &file_api_payment_v1_payment_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WxPayNotifyResp.ProtoReflect.Descriptor instead.
+func (*WxPayNotifyResp) Descriptor() ([]byte, []int) {
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{1}
+}
+
 type CreateOrderReq struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	OrderNo         string                 `protobuf:"bytes,1,opt,name=order_no,json=orderNo,proto3" json:"order_no,omitempty"`                         //  业务订单号
@@ -33,14 +105,14 @@ type CreateOrderReq struct {
 	Channel         string                 `protobuf:"bytes,7,opt,name=channel,proto3" json:"channel,omitempty"`                                        //  渠道（可选) 默认微信 wechat
 	MerchantAccount string                 `protobuf:"bytes,8,opt,name=merchant_account,json=merchantAccount,proto3" json:"merchant_account,omitempty"` //  商户账号
 	PayerClientIp   string                 `protobuf:"bytes,9,opt,name=payer_client_ip,json=payerClientIp,proto3" json:"payer_client_ip,omitempty"`     //  用户终端 IP，H5 必填
-	H5Type          string                 `protobuf:"bytes,10,opt,name=h5_type,json=h5Type,proto3" json:"h5_type,omitempty"`                           //  H5 场景类型，Wap、iOS、Android
+	H5Type          string                 `protobuf:"bytes,10,opt,name=h5_type,json=h5Type,proto3" json:"h5_type,omitempty"`                           //  H5 场景类型，Wap、iOS、Android，抖音还支持 HarmonyOS
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CreateOrderReq) Reset() {
 	*x = CreateOrderReq{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[0]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -52,7 +124,7 @@ func (x *CreateOrderReq) String() string {
 func (*CreateOrderReq) ProtoMessage() {}
 
 func (x *CreateOrderReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[0]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -65,7 +137,7 @@ func (x *CreateOrderReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrderReq.ProtoReflect.Descriptor instead.
 func (*CreateOrderReq) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{0}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateOrderReq) GetOrderNo() string {
@@ -149,7 +221,7 @@ type CreateOrderResp struct {
 
 func (x *CreateOrderResp) Reset() {
 	*x = CreateOrderResp{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[1]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -161,7 +233,7 @@ func (x *CreateOrderResp) String() string {
 func (*CreateOrderResp) ProtoMessage() {}
 
 func (x *CreateOrderResp) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[1]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -174,7 +246,7 @@ func (x *CreateOrderResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrderResp.ProtoReflect.Descriptor instead.
 func (*CreateOrderResp) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{1}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateOrderResp) GetOutTradeNo() string {
@@ -215,7 +287,7 @@ type JSAPIPayParams struct {
 
 func (x *JSAPIPayParams) Reset() {
 	*x = JSAPIPayParams{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[2]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -227,7 +299,7 @@ func (x *JSAPIPayParams) String() string {
 func (*JSAPIPayParams) ProtoMessage() {}
 
 func (x *JSAPIPayParams) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[2]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +312,7 @@ func (x *JSAPIPayParams) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JSAPIPayParams.ProtoReflect.Descriptor instead.
 func (*JSAPIPayParams) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{2}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *JSAPIPayParams) GetPrepayId() string {
@@ -301,7 +373,7 @@ type NativePayParams struct {
 
 func (x *NativePayParams) Reset() {
 	*x = NativePayParams{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[3]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -313,7 +385,7 @@ func (x *NativePayParams) String() string {
 func (*NativePayParams) ProtoMessage() {}
 
 func (x *NativePayParams) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[3]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -326,7 +398,7 @@ func (x *NativePayParams) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NativePayParams.ProtoReflect.Descriptor instead.
 func (*NativePayParams) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{3}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *NativePayParams) GetCodeUrl() string {
@@ -345,7 +417,7 @@ type H5PayParams struct {
 
 func (x *H5PayParams) Reset() {
 	*x = H5PayParams{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[4]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -357,7 +429,7 @@ func (x *H5PayParams) String() string {
 func (*H5PayParams) ProtoMessage() {}
 
 func (x *H5PayParams) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[4]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -370,7 +442,7 @@ func (x *H5PayParams) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use H5PayParams.ProtoReflect.Descriptor instead.
 func (*H5PayParams) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{4}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *H5PayParams) GetH5Url() string {
@@ -403,7 +475,7 @@ type AppPayParams struct {
 
 func (x *AppPayParams) Reset() {
 	*x = AppPayParams{}
-	mi := &file_api_payment_v1_payment_proto_msgTypes[5]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +487,7 @@ func (x *AppPayParams) String() string {
 func (*AppPayParams) ProtoMessage() {}
 
 func (x *AppPayParams) ProtoReflect() protoreflect.Message {
-	mi := &file_api_payment_v1_payment_proto_msgTypes[5]
+	mi := &file_api_payment_v1_payment_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -428,7 +500,7 @@ func (x *AppPayParams) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AppPayParams.ProtoReflect.Descriptor instead.
 func (*AppPayParams) Descriptor() ([]byte, []int) {
-	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{5}
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *AppPayParams) GetAppId() string {
@@ -480,11 +552,106 @@ func (x *AppPayParams) GetSign() string {
 	return ""
 }
 
+// 抖音 APP 调起支付参数，字段名对应抖音 OpenSDK。
+type DouyinAppPayParams struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AppId         string                 `protobuf:"bytes,1,opt,name=app_id,json=appid,proto3" json:"app_id,omitempty"`
+	PartnerId     string                 `protobuf:"bytes,2,opt,name=partner_id,json=partnerid,proto3" json:"partner_id,omitempty"`
+	PrepayId      string                 `protobuf:"bytes,3,opt,name=prepay_id,json=prepayid,proto3" json:"prepay_id,omitempty"`
+	Package       string                 `protobuf:"bytes,4,opt,name=package,proto3" json:"package,omitempty"`
+	NonceStr      string                 `protobuf:"bytes,5,opt,name=nonce_str,json=noncestr,proto3" json:"nonce_str,omitempty"`
+	TimeStamp     string                 `protobuf:"bytes,6,opt,name=time_stamp,json=timestamp,proto3" json:"time_stamp,omitempty"`
+	Sign          string                 `protobuf:"bytes,7,opt,name=sign,proto3" json:"sign,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DouyinAppPayParams) Reset() {
+	*x = DouyinAppPayParams{}
+	mi := &file_api_payment_v1_payment_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DouyinAppPayParams) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DouyinAppPayParams) ProtoMessage() {}
+
+func (x *DouyinAppPayParams) ProtoReflect() protoreflect.Message {
+	mi := &file_api_payment_v1_payment_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DouyinAppPayParams.ProtoReflect.Descriptor instead.
+func (*DouyinAppPayParams) Descriptor() ([]byte, []int) {
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *DouyinAppPayParams) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetPartnerId() string {
+	if x != nil {
+		return x.PartnerId
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetPrepayId() string {
+	if x != nil {
+		return x.PrepayId
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetPackage() string {
+	if x != nil {
+		return x.Package
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetNonceStr() string {
+	if x != nil {
+		return x.NonceStr
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetTimeStamp() string {
+	if x != nil {
+		return x.TimeStamp
+	}
+	return ""
+}
+
+func (x *DouyinAppPayParams) GetSign() string {
+	if x != nil {
+		return x.Sign
+	}
+	return ""
+}
+
 var File_api_payment_v1_payment_proto protoreflect.FileDescriptor
 
 const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\n" +
-	"\x1capi/payment/v1/payment.proto\x12\x12payment.payment.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xba\x02\n" +
+	"\x1capi/payment/v1/payment.proto\x12\x12payment.payment.v1\x1a\x1cgoogle/protobuf/struct.proto\"\x10\n" +
+	"\x0eWxPayNotifyReq\"\x11\n" +
+	"\x0fWxPayNotifyResp\"\xba\x02\n" +
 	"\x0eCreateOrderReq\x12\x19\n" +
 	"\border_no\x18\x01 \x01(\tR\aorderNo\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
@@ -527,9 +694,20 @@ const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\tnonce_str\x18\x05 \x01(\tR\bnonceStr\x12\x1d\n" +
 	"\n" +
 	"time_stamp\x18\x06 \x01(\tR\ttimeStamp\x12\x12\n" +
-	"\x04sign\x18\a \x01(\tR\x04sign2j\n" +
+	"\x04sign\x18\a \x01(\tR\x04sign\"\xd1\x01\n" +
+	"\x12DouyinAppPayParams\x12\x15\n" +
+	"\x06app_id\x18\x01 \x01(\tR\x05appid\x12\x1d\n" +
+	"\n" +
+	"partner_id\x18\x02 \x01(\tR\tpartnerid\x12\x1b\n" +
+	"\tprepay_id\x18\x03 \x01(\tR\bprepayid\x12\x18\n" +
+	"\apackage\x18\x04 \x01(\tR\apackage\x12\x1b\n" +
+	"\tnonce_str\x18\x05 \x01(\tR\bnoncestr\x12\x1d\n" +
+	"\n" +
+	"time_stamp\x18\x06 \x01(\tR\ttimestamp\x12\x12\n" +
+	"\x04sign\x18\a \x01(\tR\x04sign2\xc4\x01\n" +
 	"\x0ePaymentService\x12X\n" +
-	"\vCreateOrder\x12\".payment.payment.v1.CreateOrderReq\x1a#.payment.payment.v1.CreateOrderResp\"\x00B&Z$payment-api/api/payment/v1;paymentv1b\x06proto3"
+	"\vCreateOrder\x12\".payment.payment.v1.CreateOrderReq\x1a#.payment.payment.v1.CreateOrderResp\"\x00\x12X\n" +
+	"\vWxPayNotify\x12\".payment.payment.v1.WxPayNotifyReq\x1a#.payment.payment.v1.WxPayNotifyResp\"\x00B&Z$payment-api/api/payment/v1;paymentv1b\x06proto3"
 
 var (
 	file_api_payment_v1_payment_proto_rawDescOnce sync.Once
@@ -543,22 +721,27 @@ func file_api_payment_v1_payment_proto_rawDescGZIP() []byte {
 	return file_api_payment_v1_payment_proto_rawDescData
 }
 
-var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_api_payment_v1_payment_proto_goTypes = []any{
-	(*CreateOrderReq)(nil),  // 0: payment.payment.v1.CreateOrderReq
-	(*CreateOrderResp)(nil), // 1: payment.payment.v1.CreateOrderResp
-	(*JSAPIPayParams)(nil),  // 2: payment.payment.v1.JSAPIPayParams
-	(*NativePayParams)(nil), // 3: payment.payment.v1.NativePayParams
-	(*H5PayParams)(nil),     // 4: payment.payment.v1.H5PayParams
-	(*AppPayParams)(nil),    // 5: payment.payment.v1.AppPayParams
-	(*structpb.Struct)(nil), // 6: google.protobuf.Struct
+	(*WxPayNotifyReq)(nil),     // 0: payment.payment.v1.WxPayNotifyReq
+	(*WxPayNotifyResp)(nil),    // 1: payment.payment.v1.WxPayNotifyResp
+	(*CreateOrderReq)(nil),     // 2: payment.payment.v1.CreateOrderReq
+	(*CreateOrderResp)(nil),    // 3: payment.payment.v1.CreateOrderResp
+	(*JSAPIPayParams)(nil),     // 4: payment.payment.v1.JSAPIPayParams
+	(*NativePayParams)(nil),    // 5: payment.payment.v1.NativePayParams
+	(*H5PayParams)(nil),        // 6: payment.payment.v1.H5PayParams
+	(*AppPayParams)(nil),       // 7: payment.payment.v1.AppPayParams
+	(*DouyinAppPayParams)(nil), // 8: payment.payment.v1.DouyinAppPayParams
+	(*structpb.Struct)(nil),    // 9: google.protobuf.Struct
 }
 var file_api_payment_v1_payment_proto_depIdxs = []int32{
-	6, // 0: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
-	0, // 1: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
-	1, // 2: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	9, // 0: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
+	2, // 1: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
+	0, // 2: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
+	3, // 3: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
+	1, // 4: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -575,7 +758,7 @@ func file_api_payment_v1_payment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_payment_v1_payment_proto_rawDesc), len(file_api_payment_v1_payment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -27,7 +27,7 @@ message CreateOrderReq {
   string channel = 7;      //  渠道（可选) 默认微信 wechat
   string merchant_account = 8; //  商户账号
   string payer_client_ip = 9; //  用户终端 IP，H5 必填
-  string h5_type = 10;        //  H5 场景类型，Wap、iOS、Android
+  string h5_type = 10;        //  H5 场景类型，Wap、iOS、Android，抖音还支持 HarmonyOS
 }
 
 message CreateOrderResp {
@@ -71,5 +71,16 @@ message AppPayParams {
   // 秒级 Unix 时间戳，以字符串返回。
   string time_stamp = 6 [json_name = "timeStamp"];
   // 使用 appId、timeStamp、nonceStr、prepayId 和商户私钥生成的 RSA 签名。
+  string sign = 7;
+}
+
+// 抖音 APP 调起支付参数，字段名对应抖音 OpenSDK。
+message DouyinAppPayParams {
+  string app_id = 1 [json_name = "appid"];
+  string partner_id = 2 [json_name = "partnerid"];
+  string prepay_id = 3 [json_name = "prepayid"];
+  string package = 4;
+  string nonce_str = 5 [json_name = "noncestr"];
+  string time_stamp = 6 [json_name = "timestamp"];
   string sign = 7;
 }

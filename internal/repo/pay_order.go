@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"context"
 	"errors"
 	"payment-api/internal/models"
 
@@ -24,8 +25,8 @@ func (m *PayMysql) OrderExists(payNo string) (*models.PayOrder, error) {
 	return &doc, nil
 }
 
-func (m *PayMysql) ToOrder(payOrder *models.PayOrder) error {
-	return m.db.Create(payOrder).Error
+func (m *PayMysql) ToOrder(ctx context.Context, payOrder *models.PayOrder) error {
+	return m.db.WithContext(ctx).Create(payOrder).Error
 }
 
 func (m *PayMysql) UpdateOrder(payNo string, updateMap map[string]interface{}) error {

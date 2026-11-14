@@ -38,7 +38,7 @@
 
 各支付方法内部使用对应 SDK 的具体请求和响应类型，并将结果保存为统一响应。SDK 客户端可共享，每次下单的状态由独立对象持有。
 
-渠道工厂签名为 `func(*pay.Order) (pay.Payer, error)`。默认注册表已注册 `"wechat": NewWechatPayer`，请求省略 `channel` 时使用微信渠道。
+渠道工厂签名为 `func(*pay.Order) (pay.Payer, error)`。默认注册表已注册 `wechat` 和 `douyin`，请求省略 `channel` 时使用微信渠道。
 
 增加渠道时，实现 `Payer` 接口并注册一个渠道工厂。增加支付方式时，在 `Payer` 接口、参数校验和支付分发中增加对应入口。注册表构造时复制工厂映射，之后可供并发请求读取。
 
@@ -46,4 +46,29 @@
 
 微信默认使用 `channel_app_id`，为空时读取配置的 `app_id`。配置中的 `app_ids` 可按支付方式覆盖，例如 `{"JSAPI":"wx_miniprogram_appid","APP":"wx_mobile_appid"}`，APP 须使用移动应用的 AppID。H5 请求须提供 `payer_client_ip` 和 `h5_type`（`Wap`、`iOS`、`Android`）。
 
-`WechatPayer` 已实现四种支付方式的下单、应答验签、JSAPI/APP 调起签名和统一响应。`CheckIdempotency`、`SavePayment` 仍为待接入的业务步骤，渠道下单超时或应答不可信时须使用原订单号核实结果。幂等检查命中已有订单时填充 `Order.Response`，流程直接返回该结果。
+`WechatPayer` 已实现四种支付方式的下单、应答验签、JSAPI/APP 调起签名和统一响应。渠道下单超时或应答不可信时须使用原订单号核实结果。幂等检查命中已有订单时填充 `Order.Response`，流程直接返回该结果。
+
+## 抖音渠道
+
+请求设置 `channel: "douyin"`，`trade_type` 支持 `JSAPI`、`NATIVE`、`H5`、`APP`。配置来自对应商户的 `pay_merchant_channel.config`，使用普通商户接口和 RSA 签名、平台证书验签。
+
+```json
+{
+  "app_id": "应用AppID",
+  "app_ids": {
+    "JSAPI": "网站应用AppID",
+    "APP": "移动应用AppID"
+  },
+  "mch_id": "抖音支付商户号",
+  "cert_serial_no": "商户证书序列号",
+  "private_key": "helpers.EncryptPEMString生成的密文",
+  "platform_cert": "-----BEGIN CERTIFICATE-----\n平台证书内容\n-----END CERTIFICATE-----",
+  "notify_url": "https://example.com/payments/douyin/notify"
+}
+```
+
+AppID 选择优先级为 `app_ids[trade_type]`、`channel_app_id`、`app_id`，商户号优先使用 `channel_merchant_no`。H5 需要 `payer_client_ip` 和 `h5_type`，场景类型支持 `Wap`、`iOS`、`Android`、`HarmonyOS`。
+
+`GetPayReq` 返回完整渠道请求 JSON，`GetRawResp` 返回已获取的渠道响应体。JSAPI 返回 `signType: "DouyinPay-RSA"` 的调起参数，APP 返回对应 OpenSDK 字段和 `package: "Sign=DYPay"`，Native 和 H5 分别返回 `code_url`、`h5_url`。`notify_url` 须指向商户实际接收支付通知的接口。
+
+接口和签名依据[抖音支付官方 Go SDK](https://github.com/douyinpay/douyinpay-go)、[JSAPI 调起支付](https://pay.douyinpay.com/wiki/639fd48f17c2f3021d237f61/64413fddc6217f024ae23ae9)和[APP 调起支付](https://pay.douyinpay.com/wiki/639fd48f17c2f3021d237f61/639fd5e470f838021f2961e5)。

@@ -79,6 +79,8 @@ func (p *WechatPayer) LoadConfig(ctx context.Context) error {
 	}
 	p.config, p.client = cfg, client
 	p.order.MerchantNo = cfg.MchId
+	p.order.AppID = cfg.AppID
+	p.order.NotifyURL = cfg.NotifyUrl
 	return nil
 }
 
