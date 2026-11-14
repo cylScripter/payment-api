@@ -99,7 +99,7 @@ type CreateOrderReq struct {
 	OrderNo         string                 `protobuf:"bytes,1,opt,name=order_no,json=orderNo,proto3" json:"order_no,omitempty"`                         //  业务订单号
 	Description     string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`                                //  订单描述
 	Amount          float32                `protobuf:"fixed32,3,opt,name=amount,proto3" json:"amount,omitempty"`                                        //  订单金额 单位：元 (保留两位小数)
-	Openid          string                 `protobuf:"bytes,4,opt,name=openid,proto3" json:"openid,omitempty"`                                          //  用户标识,小程序下单需要
+	Openid          string                 `protobuf:"bytes,4,opt,name=openid,proto3" json:"openid,omitempty"`                                          //  用户标识，小程序下单需要。支付宝对应当前应用下的 buyer_open_id
 	Attach          string                 `protobuf:"bytes,5,opt,name=attach,proto3" json:"attach,omitempty"`                                          //  附加数据（可选）
 	TradeType       string                 `protobuf:"bytes,6,opt,name=trade_type,json=tradeType,proto3" json:"trade_type,omitempty"`                   //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
 	Channel         string                 `protobuf:"bytes,7,opt,name=channel,proto3" json:"channel,omitempty"`                                        //  渠道（可选) 默认微信 wechat
@@ -645,6 +645,96 @@ func (x *DouyinAppPayParams) GetSign() string {
 	return ""
 }
 
+// 支付宝小程序通过 my.tradePay 使用 tradeNO 调起支付。
+type AlipayJSAPIPayParams struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TradeNo       string                 `protobuf:"bytes,1,opt,name=trade_no,json=tradeNO,proto3" json:"trade_no,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AlipayJSAPIPayParams) Reset() {
+	*x = AlipayJSAPIPayParams{}
+	mi := &file_api_payment_v1_payment_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AlipayJSAPIPayParams) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AlipayJSAPIPayParams) ProtoMessage() {}
+
+func (x *AlipayJSAPIPayParams) ProtoReflect() protoreflect.Message {
+	mi := &file_api_payment_v1_payment_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AlipayJSAPIPayParams.ProtoReflect.Descriptor instead.
+func (*AlipayJSAPIPayParams) Descriptor() ([]byte, []int) {
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *AlipayJSAPIPayParams) GetTradeNo() string {
+	if x != nil {
+		return x.TradeNo
+	}
+	return ""
+}
+
+// 支付宝 APP 将完整订单串交给客户端支付 SDK。
+type AlipayAppPayParams struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderString   string                 `protobuf:"bytes,1,opt,name=order_string,proto3" json:"order_string,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AlipayAppPayParams) Reset() {
+	*x = AlipayAppPayParams{}
+	mi := &file_api_payment_v1_payment_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AlipayAppPayParams) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AlipayAppPayParams) ProtoMessage() {}
+
+func (x *AlipayAppPayParams) ProtoReflect() protoreflect.Message {
+	mi := &file_api_payment_v1_payment_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AlipayAppPayParams.ProtoReflect.Descriptor instead.
+func (*AlipayAppPayParams) Descriptor() ([]byte, []int) {
+	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *AlipayAppPayParams) GetOrderString() string {
+	if x != nil {
+		return x.OrderString
+	}
+	return ""
+}
+
 var File_api_payment_v1_payment_proto protoreflect.FileDescriptor
 
 const file_api_payment_v1_payment_proto_rawDesc = "" +
@@ -704,7 +794,11 @@ const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\tnonce_str\x18\x05 \x01(\tR\bnoncestr\x12\x1d\n" +
 	"\n" +
 	"time_stamp\x18\x06 \x01(\tR\ttimestamp\x12\x12\n" +
-	"\x04sign\x18\a \x01(\tR\x04sign2\xc4\x01\n" +
+	"\x04sign\x18\a \x01(\tR\x04sign\"1\n" +
+	"\x14AlipayJSAPIPayParams\x12\x19\n" +
+	"\btrade_no\x18\x01 \x01(\tR\atradeNO\"8\n" +
+	"\x12AlipayAppPayParams\x12\"\n" +
+	"\forder_string\x18\x01 \x01(\tR\forder_string2\xc4\x01\n" +
 	"\x0ePaymentService\x12X\n" +
 	"\vCreateOrder\x12\".payment.payment.v1.CreateOrderReq\x1a#.payment.payment.v1.CreateOrderResp\"\x00\x12X\n" +
 	"\vWxPayNotify\x12\".payment.payment.v1.WxPayNotifyReq\x1a#.payment.payment.v1.WxPayNotifyResp\"\x00B&Z$payment-api/api/payment/v1;paymentv1b\x06proto3"
@@ -721,30 +815,32 @@ func file_api_payment_v1_payment_proto_rawDescGZIP() []byte {
 	return file_api_payment_v1_payment_proto_rawDescData
 }
 
-var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_api_payment_v1_payment_proto_goTypes = []any{
-	(*WxPayNotifyReq)(nil),     // 0: payment.payment.v1.WxPayNotifyReq
-	(*WxPayNotifyResp)(nil),    // 1: payment.payment.v1.WxPayNotifyResp
-	(*CreateOrderReq)(nil),     // 2: payment.payment.v1.CreateOrderReq
-	(*CreateOrderResp)(nil),    // 3: payment.payment.v1.CreateOrderResp
-	(*JSAPIPayParams)(nil),     // 4: payment.payment.v1.JSAPIPayParams
-	(*NativePayParams)(nil),    // 5: payment.payment.v1.NativePayParams
-	(*H5PayParams)(nil),        // 6: payment.payment.v1.H5PayParams
-	(*AppPayParams)(nil),       // 7: payment.payment.v1.AppPayParams
-	(*DouyinAppPayParams)(nil), // 8: payment.payment.v1.DouyinAppPayParams
-	(*structpb.Struct)(nil),    // 9: google.protobuf.Struct
+	(*WxPayNotifyReq)(nil),       // 0: payment.payment.v1.WxPayNotifyReq
+	(*WxPayNotifyResp)(nil),      // 1: payment.payment.v1.WxPayNotifyResp
+	(*CreateOrderReq)(nil),       // 2: payment.payment.v1.CreateOrderReq
+	(*CreateOrderResp)(nil),      // 3: payment.payment.v1.CreateOrderResp
+	(*JSAPIPayParams)(nil),       // 4: payment.payment.v1.JSAPIPayParams
+	(*NativePayParams)(nil),      // 5: payment.payment.v1.NativePayParams
+	(*H5PayParams)(nil),          // 6: payment.payment.v1.H5PayParams
+	(*AppPayParams)(nil),         // 7: payment.payment.v1.AppPayParams
+	(*DouyinAppPayParams)(nil),   // 8: payment.payment.v1.DouyinAppPayParams
+	(*AlipayJSAPIPayParams)(nil), // 9: payment.payment.v1.AlipayJSAPIPayParams
+	(*AlipayAppPayParams)(nil),   // 10: payment.payment.v1.AlipayAppPayParams
+	(*structpb.Struct)(nil),      // 11: google.protobuf.Struct
 }
 var file_api_payment_v1_payment_proto_depIdxs = []int32{
-	9, // 0: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
-	2, // 1: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
-	0, // 2: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
-	3, // 3: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
-	1, // 4: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
-	3, // [3:5] is the sub-list for method output_type
-	1, // [1:3] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	11, // 0: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
+	2,  // 1: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
+	0,  // 2: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
+	3,  // 3: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
+	1,  // 4: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
+	3,  // [3:5] is the sub-list for method output_type
+	1,  // [1:3] is the sub-list for method input_type
+	1,  // [1:1] is the sub-list for extension type_name
+	1,  // [1:1] is the sub-list for extension extendee
+	0,  // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_api_payment_v1_payment_proto_init() }
@@ -758,7 +854,7 @@ func file_api_payment_v1_payment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_payment_v1_payment_proto_rawDesc), len(file_api_payment_v1_payment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

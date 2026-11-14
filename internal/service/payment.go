@@ -4,10 +4,7 @@ import (
 	"context"
 	paymentv1 "payment-api/api/payment/v1"
 	"payment-api/internal/service/pay"
-	"regexp"
 )
-
-var merchantOrderNumber = regexp.MustCompile(`^[0-9A-Za-z_|*-]{6,32}$`)
 
 type Payment struct {
 	paymentv1.UnimplementedPaymentServiceServer

@@ -18,7 +18,7 @@ message CreateOrderReq {
   string order_no = 1;    //  业务订单号
   string description = 2; //  订单描述
   float  amount = 3;      //  订单金额 单位：元 (保留两位小数)
-  string openid = 4;      //  用户标识,小程序下单需要
+  string openid = 4;      //  用户标识，小程序下单需要。支付宝对应当前应用下的 buyer_open_id
   string attach = 5;      //  附加数据（可选）
   string trade_type = 6;  //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
 
@@ -83,4 +83,14 @@ message DouyinAppPayParams {
   string nonce_str = 5 [json_name = "noncestr"];
   string time_stamp = 6 [json_name = "timestamp"];
   string sign = 7;
+}
+
+// 支付宝小程序通过 my.tradePay 使用 tradeNO 调起支付。
+message AlipayJSAPIPayParams {
+  string trade_no = 1 [json_name = "tradeNO"];
+}
+
+// 支付宝 APP 将完整订单串交给客户端支付 SDK。
+message AlipayAppPayParams {
+  string order_string = 1 [json_name = "order_string"];
 }

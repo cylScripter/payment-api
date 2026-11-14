@@ -38,7 +38,7 @@
 
 各支付方法内部使用对应 SDK 的具体请求和响应类型，并将结果保存为统一响应。SDK 客户端可共享，每次下单的状态由独立对象持有。
 
-渠道工厂签名为 `func(*pay.Order) (pay.Payer, error)`。默认注册表已注册 `wechat` 和 `douyin`，请求省略 `channel` 时使用微信渠道。
+渠道工厂签名为 `func(*pay.Order) (pay.Payer, error)`。默认注册表已注册 `wechat`、`douyin` 和 `alipay`，请求省略 `channel` 时使用微信渠道。
 
 增加渠道时，实现 `Payer` 接口并注册一个渠道工厂。增加支付方式时，在 `Payer` 接口、参数校验和支付分发中增加对应入口。注册表构造时复制工厂映射，之后可供并发请求读取。
 
@@ -72,3 +72,32 @@ AppID 选择优先级为 `app_ids[trade_type]`、`channel_app_id`、`app_id`，�
 `GetPayReq` 返回完整渠道请求 JSON，`GetRawResp` 返回已获取的渠道响应体。JSAPI 返回 `signType: "DouyinPay-RSA"` 的调起参数，APP 返回对应 OpenSDK 字段和 `package: "Sign=DYPay"`，Native 和 H5 分别返回 `code_url`、`h5_url`。`notify_url` 须指向商户实际接收支付通知的接口。
 
 接口和签名依据[抖音支付官方 Go SDK](https://github.com/douyinpay/douyinpay-go)、[JSAPI 调起支付](https://pay.douyinpay.com/wiki/639fd48f17c2f3021d237f61/64413fddc6217f024ae23ae9)和[APP 调起支付](https://pay.douyinpay.com/wiki/639fd48f17c2f3021d237f61/639fd5e470f838021f2961e5)。
+
+## 支付宝渠道
+
+请求设置 `channel: "alipay"`，支持 `JSAPI`、`NATIVE`、`H5`、`APP`。使用商户应用直连、公钥模式和 RSA2 签名，配置保存在对应商户的 `pay_merchant_channel.config`。
+
+```json
+{
+  "app_id": "支付宝应用AppID",
+  "seller_id": "收款商户PID",
+  "private_key": "helpers.EncryptPEMString生成的应用私钥密文",
+  "alipay_public_key": "支付宝公钥内容",
+  "notify_url": "https://example.com/payments/alipay/notify",
+  "return_url": "https://example.com/payment/result",
+  "sandbox": false
+}
+```
+
+`channel_app_id`、`channel_merchant_no` 分别优先覆盖 `app_id`、`seller_id`。`sandbox: true` 使用支付宝沙箱网关，需要配套的沙箱应用和密钥。`return_url` 是可选的 H5 同步跳转地址，`notify_url` 指向实际接收支付宝异步通知的接口。
+
+| 支付方式 | 支付宝接口 | pay_params |
+| --- | --- | --- |
+| JSAPI | alipay.trade.create | `tradeNO`，交给 `my.tradePay` |
+| NATIVE | alipay.trade.precreate | `code_url`，生成二维码 |
+| H5 | alipay.trade.wap.pay | `h5_url`，浏览器跳转 |
+| APP | alipay.trade.app.pay | `order_string`，交给支付宝客户端 SDK |
+
+JSAPI 的 `openid` 对应当前应用下的 `buyer_open_id`。金额按元传入，最多两位小数，`attach` 经 URL 编码后作为 `passback_params` 传递，编码后最多 512 个字符。H5、APP 在本地生成签名参数，`GetRawResp` 为空，JSAPI、Native 保存完整原始响应并由 SDK 验签。
+
+接口对应关系参考[支付宝 Easy SDK 能力列表](https://github.com/alipay/alipay-easysdk#apilist)，Go 客户端使用 [smartwalle/alipay](https://github.com/smartwalle/alipay)。

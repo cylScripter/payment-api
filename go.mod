@@ -8,6 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/smartwalle/alipay/v3 v3.2.29
 	github.com/spf13/viper v1.21.0
 	github.com/wechatpay-apiv3/wechatpay-go v0.2.21
 	google.golang.org/genproto/googleapis/api v0.0.0-20260817212433-ac3dfec99bb1
@@ -45,6 +46,9 @@ require (
 	github.com/quic-go/quic-go v0.59.1 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/shopspring/decimal v1.6.0 // indirect
+	github.com/smartwalle/ncrypto v1.0.4 // indirect
+	github.com/smartwalle/ngx v1.1.0 // indirect
+	github.com/smartwalle/nsign v1.0.9 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect

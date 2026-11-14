@@ -19,6 +19,7 @@ type ChannelRegistry struct {
 var defaultChannels = &ChannelRegistry{factories: map[string]ChannelFactory{
 	"wechat": NewWechatPayer,
 	"douyin": NewDouyinPayer,
+	"alipay": NewAlipayPayer,
 }}
 
 func NewChannelRegistry(factories map[string]ChannelFactory) (*ChannelRegistry, error) {
