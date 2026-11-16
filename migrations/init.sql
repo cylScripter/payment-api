@@ -79,6 +79,7 @@ CREATE TABLE `pay_order` (
     `pay_amount`       BIGINT        DEFAULT NULL COMMENT '用户实付金额，单位分',
     `refunded_amount`  BIGINT        NOT NULL DEFAULT 0 COMMENT '累计退款成功金额，单位分，与total_amount同口径',
     `status`           VARCHAR(32)   NOT NULL DEFAULT 'PENDING' COMMENT '支付状态，退款后保持SUCCESS',
+    `business_notify_status` VARCHAR(16) NOT NULL DEFAULT '' COMMENT '业务通知状态，空值未收到支付回调，PENDING待投递，SUCCESS已投递',
     `channel`          VARCHAR(32)   DEFAULT NULL COMMENT '支付渠道',
     `trade_no`         VARCHAR(128)  DEFAULT NULL COMMENT '渠道交易号',
     `currency`         VARCHAR(8)    DEFAULT 'CNY' COMMENT '货币类型',
@@ -97,7 +98,8 @@ CREATE TABLE `pay_order` (
     `create_time`      DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '本地入库时间',
     `update_time`      DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_pay_no` (`pay_no`)
+    UNIQUE KEY `uk_pay_no` (`pay_no`),
+    KEY `idx_business_notify` (`status`, `business_notify_status`, `update_time`, `id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_bin

@@ -2,6 +2,7 @@ package initials
 
 import (
 	"payment-api/internal/service/merchant"
+	"payment-api/internal/service/notify"
 	"sync"
 
 	"payment-api/internal/config"
@@ -10,10 +11,11 @@ import (
 )
 
 var (
-	once      sync.Once
-	initErr   error
-	stopWatch func()
-	closeMu   sync.Mutex
+	once       sync.Once
+	initErr    error
+	stopWatch  func()
+	stopNotify func()
+	closeMu    sync.Mutex
 )
 
 func Init(sources ...config.Source) error {
@@ -30,7 +32,9 @@ func Init(sources ...config.Source) error {
 		stopWatch, initErr = config.Watch(applyConfig)
 		if initErr != nil {
 			_ = gormhelper.ClientInstance.Close()
+			return
 		}
+		stopNotify = notify.StartBusinessNotify()
 	})
 
 	if initErr != nil {
@@ -46,6 +50,10 @@ func Init(sources ...config.Source) error {
 func Close() error {
 	closeMu.Lock()
 	defer closeMu.Unlock()
+	if stopNotify != nil {
+		stopNotify()
+		stopNotify = nil
+	}
 	if stopWatch != nil {
 		stopWatch()
 		stopWatch = nil

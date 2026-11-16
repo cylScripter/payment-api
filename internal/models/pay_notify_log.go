@@ -14,6 +14,7 @@ type PayNotifyLog struct {
 	ErrMessage    string    `json:"err_message" gorm:"column:err_message;"`                        // 错误信息
 	CreateTime    time.Time `json:"create_time" gorm:"column:create_time;not null;autoCreateTime"` // 本地入库时间
 	UpdateTime    time.Time `json:"update_time" gorm:"column:update_time;not null;autoUpdateTime"`
+	RequestId     string    `json:"request_id" gorm:"column:request_id;not null"` // 请求ID
 }
 
 func (PayNotifyLog) TableName() string { return "pay_notify_log" }

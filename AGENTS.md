@@ -99,12 +99,12 @@ This project is indexed by GitNexus as **payment-api** (830 symbols, 1561 relati
 
 ## Resources
 
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/payment-api/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/payment-api/clusters` | All functional areas |
-| `gitnexus://repo/payment-api/processes` | All execution flows |
-| `gitnexus://repo/payment-api/process/{name}` | Step-by-step execution trace |
+| Resource                                     | Use for                                  |
+|----------------------------------------------|------------------------------------------|
+| `gitnexus://repo/payment-api/context`        | Codebase overview, check index freshness |
+| `gitnexus://repo/payment-api/clusters`       | All functional areas                     |
+| `gitnexus://repo/payment-api/processes`      | All execution flows                      |
+| `gitnexus://repo/payment-api/process/{name}` | Step-by-step execution trace             |
 
 ## CLI
 

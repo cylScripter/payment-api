@@ -30,5 +30,9 @@ func (m *PayMysql) ToOrder(ctx context.Context, payOrder *models.PayOrder) error
 }
 
 func (m *PayMysql) UpdateOrder(payNo string, updateMap map[string]interface{}) error {
-	return m.db.Model(&models.PayOrder{}).Where("pay_no = ?", payNo).Updates(updateMap).Error
+	query := m.db.Model(&models.PayOrder{}).Where("pay_no = ?", payNo)
+	if updateMap["status"] == models.PayStatusFailed {
+		query = query.Where("status IS NULL OR status <> ?", models.PayStatusSuccess)
+	}
+	return query.Updates(updateMap).Error
 }
