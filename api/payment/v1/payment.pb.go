@@ -23,9 +23,12 @@ const (
 )
 
 type WxPayNotifyReq struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	MerchantAccount string                 `protobuf:"bytes,1,opt,name=merchant_account,json=merchantAccount,proto3" json:"merchant_account,omitempty"`                                    // 从回调地址获取
+	Body            []byte                 `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`                                                                                 // HTTP 原始请求体，保持原始字节
+	Headers         map[string]string      `protobuf:"bytes,3,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // 微信验签请求头
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *WxPayNotifyReq) Reset() {
@@ -56,6 +59,27 @@ func (x *WxPayNotifyReq) ProtoReflect() protoreflect.Message {
 // Deprecated: Use WxPayNotifyReq.ProtoReflect.Descriptor instead.
 func (*WxPayNotifyReq) Descriptor() ([]byte, []int) {
 	return file_api_payment_v1_payment_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *WxPayNotifyReq) GetMerchantAccount() string {
+	if x != nil {
+		return x.MerchantAccount
+	}
+	return ""
+}
+
+func (x *WxPayNotifyReq) GetBody() []byte {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+func (x *WxPayNotifyReq) GetHeaders() map[string]string {
+	if x != nil {
+		return x.Headers
+	}
+	return nil
 }
 
 type WxPayNotifyResp struct {
@@ -739,8 +763,14 @@ var File_api_payment_v1_payment_proto protoreflect.FileDescriptor
 
 const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\n" +
-	"\x1capi/payment/v1/payment.proto\x12\x12payment.payment.v1\x1a\x1cgoogle/protobuf/struct.proto\"\x10\n" +
-	"\x0eWxPayNotifyReq\"\x11\n" +
+	"\x1capi/payment/v1/payment.proto\x12\x12payment.payment.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd6\x01\n" +
+	"\x0eWxPayNotifyReq\x12)\n" +
+	"\x10merchant_account\x18\x01 \x01(\tR\x0fmerchantAccount\x12\x12\n" +
+	"\x04body\x18\x02 \x01(\fR\x04body\x12I\n" +
+	"\aheaders\x18\x03 \x03(\v2/.payment.payment.v1.WxPayNotifyReq.HeadersEntryR\aheaders\x1a:\n" +
+	"\fHeadersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x11\n" +
 	"\x0fWxPayNotifyResp\"\xba\x02\n" +
 	"\x0eCreateOrderReq\x12\x19\n" +
 	"\border_no\x18\x01 \x01(\tR\aorderNo\x12 \n" +
@@ -815,7 +845,7 @@ func file_api_payment_v1_payment_proto_rawDescGZIP() []byte {
 	return file_api_payment_v1_payment_proto_rawDescData
 }
 
-var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_api_payment_v1_payment_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_api_payment_v1_payment_proto_goTypes = []any{
 	(*WxPayNotifyReq)(nil),       // 0: payment.payment.v1.WxPayNotifyReq
 	(*WxPayNotifyResp)(nil),      // 1: payment.payment.v1.WxPayNotifyResp
@@ -828,19 +858,21 @@ var file_api_payment_v1_payment_proto_goTypes = []any{
 	(*DouyinAppPayParams)(nil),   // 8: payment.payment.v1.DouyinAppPayParams
 	(*AlipayJSAPIPayParams)(nil), // 9: payment.payment.v1.AlipayJSAPIPayParams
 	(*AlipayAppPayParams)(nil),   // 10: payment.payment.v1.AlipayAppPayParams
-	(*structpb.Struct)(nil),      // 11: google.protobuf.Struct
+	nil,                          // 11: payment.payment.v1.WxPayNotifyReq.HeadersEntry
+	(*structpb.Struct)(nil),      // 12: google.protobuf.Struct
 }
 var file_api_payment_v1_payment_proto_depIdxs = []int32{
-	11, // 0: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
-	2,  // 1: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
-	0,  // 2: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
-	3,  // 3: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
-	1,  // 4: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
-	3,  // [3:5] is the sub-list for method output_type
-	1,  // [1:3] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	11, // 0: payment.payment.v1.WxPayNotifyReq.headers:type_name -> payment.payment.v1.WxPayNotifyReq.HeadersEntry
+	12, // 1: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
+	2,  // 2: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
+	0,  // 3: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
+	3,  // 4: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
+	1,  // 5: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
+	4,  // [4:6] is the sub-list for method output_type
+	2,  // [2:4] is the sub-list for method input_type
+	2,  // [2:2] is the sub-list for extension type_name
+	2,  // [2:2] is the sub-list for extension extendee
+	0,  // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_api_payment_v1_payment_proto_init() }
@@ -854,7 +886,7 @@ func file_api_payment_v1_payment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_payment_v1_payment_proto_rawDesc), len(file_api_payment_v1_payment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

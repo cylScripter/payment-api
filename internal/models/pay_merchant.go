@@ -45,6 +45,7 @@ type WeChatPayConfig struct {
 	PrivateKey   string            `json:"private_key"`
 	PublicKeyId  string            `json:"public_key_id"`
 	PublicKey    string            `json:"public_key"`
+	ApiV3Key     string            `json:"api_v3_key"`
 	NotifyUrl    string            `json:"notify_url"`
 }
 
@@ -54,10 +55,13 @@ func (p PayMerchantChannel) WeChatPayConfig() WeChatPayConfig {
 	var (
 		privateKey string
 		publicKey  string
+		apiV3Key   string
 	)
 	privateKey, _ = helpers.DecryptPEMString(doc.PrivateKey, []byte(config.Get().EncryptKey))
 	publicKey, _ = helpers.DecryptPEMString(doc.PublicKey, []byte(config.Get().EncryptKey))
+	apiV3Key, _ = helpers.DecryptPEMString(doc.ApiV3Key, []byte(config.Get().EncryptKey))
 	doc.PrivateKey = privateKey
 	doc.PublicKey = publicKey
+	doc.ApiV3Key = apiV3Key
 	return doc
 }

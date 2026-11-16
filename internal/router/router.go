@@ -22,5 +22,6 @@ func New() *gin.Engine {
 	r.GET("/health", controller.Health)
 	r.POST("/v1/auth/wechat/login", controller.WechatLogin)
 	r.POST("/v1/payments/jsapi", controller.CreateOrder)
+	r.POST("/v1/wechat/pay/notify/:merchant_account", controller.WxPayNotify)
 	return r
 }

@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"os"
 	"strings"
@@ -89,4 +90,15 @@ func DecryptPEMString(encoded string, key []byte) (string, error) {
 		return "", err
 	}
 	return string(plaintext), nil
+}
+
+// GenerateSecret 生成 32 个字符的随机密钥
+func GenerateSecret() (string, error) {
+	b := make([]byte, 16)
+
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(b), nil
 }

@@ -10,7 +10,11 @@ service PaymentService {
   rpc CreateOrder(CreateOrderReq) returns (CreateOrderResp) {}
   rpc WxPayNotify(WxPayNotifyReq) returns (WxPayNotifyResp) {} // 微信支付回调
 }
-message WxPayNotifyReq {}
+message WxPayNotifyReq {
+  string merchant_account = 1; // 从回调地址获取
+  bytes body = 2;             // HTTP 原始请求体，保持原始字节
+  map<string, string> headers = 3; // 微信验签请求头
+}
 
 message WxPayNotifyResp {}
 
