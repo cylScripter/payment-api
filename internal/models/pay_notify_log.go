@@ -2,6 +2,11 @@ package models
 
 import "time"
 
+const (
+	NotifyTypePay    = "PAY"    // 支付通知
+	NotifyTypeRefund = "REFUND" // 退款通知
+)
+
 type PayNotifyLog struct {
 	ID            int64     `json:"id" gorm:"column:id;primary_key"`
 	PayNo         string    `json:"pay_no" gorm:"column:pay_no;not null"`                          // 支付单号

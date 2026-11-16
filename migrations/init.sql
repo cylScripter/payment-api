@@ -1,36 +1,33 @@
 CREATE TABLE `pay_flow` (
-                            `id`               BIGINT       NOT NULL AUTO_INCREMENT,
-                            `flow_no`          VARCHAR(64)  NOT NULL COMMENT '网关资金流水号',
-                            `pay_no`           VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '关联支付单号，可空',
-                            `refund_no`        VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '关联退款单号，可空',
-                            `channel`          VARCHAR(32)  NOT NULL COMMENT '支付渠道',
-                            `merchant_no`      VARCHAR(64)  NOT NULL COMMENT '渠道商户号',
-                            `app_id`           VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '渠道应用ID',
-                            `open_id`          VARCHAR(128) NOT NULL DEFAULT '' COMMENT '用户在渠道的标识',
-                            `account_type`     VARCHAR(32)  NOT NULL COMMENT '渠道资金账户类型，微信为 BASIC、OPERATION、FEES',
-                            `channel_flow_no`  VARCHAR(128) NOT NULL COMMENT '渠道流水号',
-                            `channel_biz_no`   VARCHAR(128) NOT NULL DEFAULT '' COMMENT '渠道业务单号，用于关联渠道交易或退款',
-                            `channel_biz_type` VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '渠道原始业务类型',
-                            `flow_type`        VARCHAR(32)  NOT NULL COMMENT '资金变动类型',
-                            `direction`        VARCHAR(16)  NOT NULL COMMENT '收支方向',
-                            `total_amount`     BIGINT       NOT NULL COMMENT '本次发生金额，正整数，单位分',
-                            `real_amount`      BIGINT       NOT NULL COMMENT '实际收付款金额，正整数，单位分',
-                            `currency`         VARCHAR(8)   NOT NULL COMMENT '币种',
-                            `merchant_account` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '账户',
-                            `accounted_time`   DATETIME(3)  NOT NULL COMMENT '渠道实际记账时间',
-                            `bill_date`        DATE         NOT NULL COMMENT '所属渠道账单日期',
-                            `remark`           VARCHAR(512) NOT NULL DEFAULT '' COMMENT '账单备注',
-                            `create_time`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '本地入库时间',
-                            `update_time`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
-                                   ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-                            PRIMARY KEY (`id`),
-                            UNIQUE KEY `uk_flow_no` (`flow_no`),
-                            UNIQUE KEY `uk_channel_flow` (
-                                `channel`, `merchant_no`, `account_type`, `channel_flow_no`
-                                ),
-                            KEY `idx_pay_no` (`pay_no`),
-                            KEY `idx_refund_no` (`refund_no`),
-                            KEY `idx_merchant_bill_date` (`channel`, `merchant_no`, `bill_date`)
+    `id`               BIGINT       NOT NULL AUTO_INCREMENT,
+    `flow_no`          VARCHAR(64)  NOT NULL COMMENT '网关资金流水号',
+    `pay_no`           VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '关联支付单号，可空',
+    `refund_no`        VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '关联退款单号，可空',
+    `merchant_account` VARCHAR(128) NOT NULL DEFAULT '' COMMENT '账户',
+    `channel`          VARCHAR(32)  NOT NULL COMMENT '支付渠道',
+    `merchant_no`      VARCHAR(64)  NOT NULL COMMENT '渠道商户号',
+    `app_id`           VARCHAR(64)  NOT NULL DEFAULT '' COMMENT '渠道应用ID',
+    `open_id`          VARCHAR(128) NOT NULL DEFAULT '' COMMENT '用户在渠道的标识',
+    `account_type`     VARCHAR(32)  NOT NULL COMMENT '渠道资金账户类型，微信为 BASIC、OPERATION、FEES',
+    `trade_no`         VARCHAR(128) NOT NULL COMMENT '渠道流水号',
+    `refund_trade_no`  VARCHAR(128) NOT NULL DEFAULT '' COMMENT '渠道退款流水号',
+    `flow_type`        VARCHAR(32)  NOT NULL COMMENT '资金变动类型',
+    `direction`        VARCHAR(16)  NOT NULL COMMENT '收支方向',
+    `total_amount`     BIGINT       NOT NULL COMMENT '本次发生金额，正整数，单位分',
+    `real_amount`      BIGINT       NOT NULL COMMENT '实际收付款金额，正整数，单位分',
+    `currency`         VARCHAR(8)   NOT NULL COMMENT '币种',
+    `accounted_time`   DATETIME(3)  NOT NULL COMMENT '收付款成功时间',
+    `trade_time`       DATETIME(3)  NOT NULL COMMENT '账单日期',
+    `remark`           VARCHAR(512) NOT NULL DEFAULT '' COMMENT '账单备注',
+    `create_time`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '本地入库时间',
+    `update_time`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+        ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_flow_no` (`flow_no`),
+    UNIQUE KEY `uk_channel_flow` (`channel`, `merchant_no`, `account_type`, `trade_no`),
+    KEY `idx_pay_no` (`pay_no`),
+    KEY `idx_refund_no` (`refund_no`),
+    KEY `idx_merchant_trade_time` (`channel`, `merchant_no`, `trade_time`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_bin
@@ -107,6 +104,7 @@ CREATE TABLE `pay_order` (
 
 CREATE TABLE `pay_notify_log` (
     `id`             BIGINT       NOT NULL AUTO_INCREMENT,
+    `request_id`     VARCHAR(128) NOT NULL DEFAULT '' COMMENT '请求ID',
     `pay_no`         VARCHAR(64)  NOT NULL COMMENT '支付单号',
     `trade_no`       VARCHAR(128) NOT NULL COMMENT '渠道交易号',
     `channel`        VARCHAR(32)  NOT NULL COMMENT '支付渠道',
@@ -122,3 +120,19 @@ CREATE TABLE `pay_notify_log` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_bin
   COMMENT='支付回调通知日志';
+
+CREATE TABLE IF NOT EXISTS `merchant_wallet` (
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `create_time` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+    `update_time` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+        ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+    `account`     VARCHAR(128) NOT NULL COMMENT '商户账号',
+    `merchant_id` BIGINT NOT NULL COMMENT '商户ID',
+    `balance`     BIGINT NOT NULL DEFAULT 0 COMMENT '钱包余额，单位分',
+    `version`     BIGINT NOT NULL DEFAULT 0 COMMENT '版本号',
+    PRIMARY KEY (`id`),
+    KEY `idx_wallet_account` (`account`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_bin
+  COMMENT='商户钱包';

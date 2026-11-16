@@ -1,12 +1,17 @@
 package notify
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"time"
 
-	"payment-api/internal/models"
 	"payment-api/internal/repo"
+
+	"github.com/cloudwego/kitex/tool/internal_pkg/log"
 )
 
 // BusinessNotify 金额均为整数分，业务方按 PayNo 幂等处理。
@@ -31,8 +36,29 @@ var businessClient = &http.Client{
 	},
 }
 
-func sendBusinessNotify(ctx context.Context, order *models.PayOrder, mysql *repo.PayMysql) error {
-
+func sendBusinessNotify(ctx context.Context, notifyURL string, payload *BusinessNotify) error {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, notifyURL, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := businessClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Errorf("关闭响应体失败: %v", err)
+		}
+	}(resp.Body)
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return fmt.Errorf("业务通知返回 HTTP %d", resp.StatusCode)
+	}
 	return nil
 }
 
