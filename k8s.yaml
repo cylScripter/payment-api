@@ -22,7 +22,7 @@ spec:
         - name: registry-secret
       containers:
         - name: payment-api
-          image: 114.132.181.123:50000/open/payment-api:v20261117-130406-main
+          image: 114.132.181.123:50000/open/payment-api:v20261118-025647-main
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -49,7 +49,7 @@ spec:
             httpGet:
               path: /health
               port: http
-            periodSeconds: 10
+            periodSeconds: 5
             timeoutSeconds: 2
 ---
 apiVersion: v1
@@ -66,7 +66,9 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: 8080
+      nodePort: 22636
     - name: grpc
       protocol: TCP
       port: 9090
       targetPort: 9090
+      nodePort: 43780

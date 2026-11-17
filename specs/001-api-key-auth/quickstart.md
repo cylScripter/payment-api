@@ -42,7 +42,7 @@ PAY_AUTH_KEY_A="$(
     -H 'Content-Type: application/json' --data-binary @- |
   jq -er 'select(.code == 0) | .data.api_key'
 )"
-test "${#PAY_AUTH_KEY_A}" -eq 43
+test "${#PAY_AUTH_KEY_A}" -eq 35
 ```
 
 预期拿到密钥且长度检查通过。使用相同方式为 B 签发并保存为 `PAY_AUTH_KEY_B`。再次为 A 签发，新旧密钥必须不同且均可通过认证。
@@ -141,7 +141,7 @@ grpcurl -plaintext -import-path . -import-path third_party \
   -H "authorization: Bearer $PAY_AUTH_ADMIN_KEY" \
   -d @ "$PAY_AUTH_RPC" payment.auth.v1.AuthService/GenerateAPIKey |
 jq -e --arg account "$PAY_AUTH_MERCHANT_A" \
-  '.merchant_account == $account and (.api_key | length) == 43'
+  '.merchant_account == $account and (.api_key | test("^sk-[0-9a-f]{32}$"))'
 ```
 
 预期输出 `true`。拒绝场景的密钥记录增量均为 0。

@@ -31,7 +31,7 @@ router 使用 Gin 路由分组挂载中间件，公开组直接处理健康检�
 
 | 字段 | 编号 | JSON 名 | 类型 | 含义 |
 | --- | --- | --- | --- | --- |
-| api_key | 1 | api_key | string | 新签发的 43 字符完整密钥 |
+| api_key | 1 | api_key | string | 新签发的 35 字符（sk- 加 32 位小写十六进制）完整密钥 |
 | merchant_account | 2 | merchant_account | string | 所属商户账号 |
 
 ```json
@@ -39,7 +39,7 @@ router 使用 Gin 路由分组挂载中间件，公开组直接处理健康检�
   "code": 0,
   "message": "ok",
   "data": {
-    "api_key": "<generated-api-key>",
+    "api_key": "sk-ead347eaa7ea43a2ba691adf0422c264",
     "merchant_account": "merchant-a"
   }
 }

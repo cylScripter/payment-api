@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -28,9 +27,9 @@ func (c *Auth) GenerateAPIKey(ctx context.Context, req *authv1.GenerateAPIKeyReq
 	if strings.TrimSpace(req.MerchantAccount) == "" || utf8.RuneCountInString(req.MerchantAccount) > 128 {
 		return nil, status.Error(codes.InvalidArgument, "merchant_account 必填且不能超过 128 个字符")
 	}
-	var random [32]byte
+	var random [16]byte
 	_, _ = rand.Read(random[:])
-	key := base64.RawURLEncoding.EncodeToString(random[:])
+	key := "sk-" + hex.EncodeToString(random[:])
 	hash := sha256.Sum256([]byte(key))
 	keyHash := hex.EncodeToString(hash[:])
 

@@ -32,13 +32,13 @@
 
 **目标** 平台通过管理凭证为指定正常商户取得首把及后续密钥。
 
-**独立验收** 按联调指南完成 HTTP 和 RPC 首次签发、再次签发及未授权拒绝。成功返回 43 字符密钥及正确商户账号，失败结果符合契约，未授权请求的密钥记录增量为 0。
+**独立验收** 按联调指南完成 HTTP 和 RPC 首次签发、再次签发及未授权拒绝。成功返回 35 字符（sk- 加 32 位小写十六进制）密钥及正确商户账号，失败结果符合契约，未授权请求的密钥记录增量为 0。
 
 - [X] T009 [P] [US1] 在 `internal/repo/merchant_api_key.go` 实现主库签发事务，按 BINARY account 精确匹配，最多读取两条商户并锁定目标行，复用商户状态“1 正常，2 禁用”。仅在匹配唯一且状态正常的商户时签发，插入摘要并在提交成功后返回绑定商户，失败直接返回 error。依赖 T006。
 - [X] T010 [P] [US1] 在 `internal/controllers/api_key.go` 新增 GenerateAPIKey handler，按已生成的方法签名完成 protojson 请求绑定，使用 `ctx.Request.Context()` 调用现有 Auth 并通过 Controller.Response 返回 GenerateAPIKeyResp，绑定选项与现有 controller 一致。依赖 T003、T007，使用生成接口契约，可与 T009 并行。
-- [X] T011 [US1] 在 `internal/service/auth.go` 实现 Auth.GenerateAPIKey，校验请求商户号“必填，非纯空白，最长 128 字符，与既有商户账号精确匹配”。使用 crypto/rand 生成 32 字节，经 RawURLEncoding 得到 43 字符密钥，摘要传给签发事务，提交成功后构造 GenerateAPIKeyResp。签发失败统一返回 503 和固定错误消息。依赖 T003、T007、T009。
+- [X] T011 [US1] 在 `internal/service/auth.go` 实现 Auth.GenerateAPIKey，校验请求商户号“必填，非纯空白，最长 128 字符，与既有商户账号精确匹配”。使用 crypto/rand 生成 16 字节，编码为 32 位小写十六进制并加上 sk- 前缀，得到 35 字符密钥，摘要传给签发事务，提交成功后构造 GenerateAPIKeyResp。签发失败统一返回 503 和固定错误消息。依赖 T003、T007、T009。
 - [X] T012 [US1] 在 `internal/router/router.go` 使用 Gin 分组，public 组注册健康检查与支付回调，merchant 组挂载 Auth(false)，payments 组挂载 Auth(true)，admin 组挂载 AdminAuth 并注册 POST /v1/auth/api-keys 到新增 handler，在 `internal/rpc/server.go` 的签发方法入口调用同一管理校验。依赖 T008、T010、T011。
-- [X] T013 [US1] 按 `specs/001-api-key-auth/quickstart.md` 的首次签发、管理授权及 RPC 签发步骤联调，覆盖首把、重复签发、未知凭证、商户凭证访问管理接口、空账号、超长账号、不存在或禁用商户以及重复账号。核对成功响应包含正确账号和 43 字符密钥，持久化记录包含 64 字符摘要，以新旧密钥调用空 code 登录请求得到原业务参数错误 400，验证均能立即通过认证，拒绝签发请求记录增量为 0，记录实际结果。依赖 T012。
+- [X] T013 [US1] 按 `specs/001-api-key-auth/quickstart.md` 的首次签发、管理授权及 RPC 签发步骤联调，覆盖首把、重复签发、未知凭证、商户凭证访问管理接口、空账号、超长账号、不存在或禁用商户以及重复账号。核对成功响应包含正确账号和 35 字符（sk- 加 32 位小写十六进制）密钥，持久化记录包含 64 字符摘要，以新旧密钥调用空 code 登录请求得到原业务参数错误 400，验证均能立即通过认证，拒绝签发请求记录增量为 0，记录实际结果。依赖 T012。
 
 ## 阶段 4 — US2 携带密钥访问业务接口（P1）
 

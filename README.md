@@ -72,6 +72,8 @@ make build
 
 ## 接口
 
+商户创建订单及支付成功业务回调见 [支付对接接口文档](docs/payment-integration.md)。
+
 HTTP 与 RPC 共用 service。HTTP 响应统一为 `code`、`message`、`data`，成功时 `code` 为 `0`，失败时 `data` 为 `{}`，HTTP 状态码根据错误类型映射。
 
 | HTTP | RPC | 说明 |

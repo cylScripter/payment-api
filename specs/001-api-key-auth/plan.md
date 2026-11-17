@@ -12,7 +12,7 @@ setup-plan 返回的 `BRANCH=001-api-key-auth` 是功能目录派生标识，实
 
 - **语言与依赖** Go 1.26.0、Gin 1.12.0、GORM 1.31.2、DBResolver 1.6.2，使用现有 Protobuf 工具链。
 - **存储** MySQL 新增 `pay_merchant_api_key` 表，增量及初始化 SQL 同步维护。
-- **密钥** `crypto/rand.Read` 生成 32 字节，RawURL Base64 编码为 43 字符。完整密钥的 SHA-256 十六进制摘要作为唯一查询条件。
+- **密钥** `crypto/rand.Read` 生成 16 字节，编码为 32 位小写十六进制并加上 `sk-` 前缀，共 35 字符。完整密钥的 SHA-256 十六进制摘要作为唯一查询条件。
 - **管理配置** 新增 `auth.admin_key`，通过 `config.Get()` 读取当前快照。缺省或空值允许服务启动，签发接口返回 503。非空值须为无空白、无逗号的单个凭证值，验证失败沿用当前配置。
 - **一致性** 鉴权、商户状态读取及签发事务通过 `dbresolver.Write` 使用主库，所有查询传递调用方 context。
 - **验证** 实施后执行 `make proto`、`go build ./...`、`go vet ./...` 及 [quickstart.md](quickstart.md) 的联调步骤。

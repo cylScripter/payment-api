@@ -1,0 +1,311 @@
+# 支付对接接口文档
+
+本文按当前代码整理，包含商户创建订单接口和支付成功业务回调。创建订单支持微信、支付宝、抖音支付，统一业务回调目前已接入微信支付。
+
+## 接入准备
+
+接入前由支付服务提供对应环境的服务地址、商户账号 `account` 和 API Key，并开通商户需要使用的支付渠道及应用。
+
+业务方提供支付成功通知地址，由支付服务配置到商户的 `pay_merchant.notify_url`。示例服务地址使用 `https://pay.example.com`，业务通知地址使用 `https://merchant.example.com/payment/notify`。
+
+基本流程如下。
+
+1. 业务后端携带商户 API Key 调用创建订单接口。
+2. 保存响应中的支付单号 `data.outTradeNo`，关联业务订单号 `order_no`。
+3. 将 `data.payParams` 交给对应客户端调起支付。
+4. 支付服务处理渠道支付成功通知后，向商户配置的业务通知地址发送回调。
+5. 业务后端根据回调中的订单号和金额处理业务，并返回 HTTP 2xx。
+
+## 创建订单
+
+### 请求地址
+
+```http
+POST /merchant-api/v1/create/order
+Content-Type: application/json
+Authorization: Bearer <API_KEY>
+```
+
+API Key 所属商户必须与请求中的 `account` 一致。API Key 由业务后端保存并用于请求支付服务。
+
+### 请求参数
+
+| 字段                | 类型     | 必填   | 说明                                                     |
+|-------------------|--------|------|--------------------------------------------------------|
+| `account`         | string | 是    | 支付服务分配的商户账号                                            |
+| `order_no`        | string | 是    | 业务方订单号，用于关联业务订单                                        |
+| `description`     | string | 是    | 订单商品描述，长度限制见下表                                         |
+| `amount`          | number | 是    | 订单金额，单位为元，大于 0，最多两位小数，例如 `0.01`、`12.50`                |
+| `trade_type`      | string | 是    | 支付方式，支持 `JSAPI`、`NATIVE`、`H5`、`APP`，按大小写传入             |
+| `channel`         | string | 否    | 支付渠道，支持 `wechat`、`alipay`、`douyin`，省略或空字符串时使用 `wechat` |
+| `openid`          | string | 条件必填 | `JSAPI` 必填，使用对应渠道、对应应用下的用户标识。支付宝填写 `buyer_open_id`     |
+| `attach`          | string | 否    | 渠道附加数据，长度限制见下表                                         |
+| `payer_client_ip` | string | 条件必填 | 微信、抖音 `H5` 支付必填，填写用户终端有效 IP 地址                         |
+| `h5_type`         | string | 条件必填 | 微信、抖音 `H5` 支付必填，取值见下表                                  |
+
+| 渠道           | 参数约束                                                                                                                                                                                                        |
+|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 微信 `wechat`  | `order_no` 为 6～32 位数字、字母或 `_`、`-`、`\|`、`*`。`description` 最多 127 个字符，`attach` 最多 128 个字符。`description`、`attach`、`openid` 使用 UTF-8 一至三个字节编码的字符。JSAPI 的 `openid` 最多 128 个字符。`h5_type` 支持 `Wap`、`iOS`、`Android` |
+| 抖音 `douyin`  | `description` 最多 127 个字符，`attach` 最多 1024 个字符。JSAPI 的 `openid` 最多 128 个字符。`h5_type` 支持 `Wap`、`iOS`、`Android`、`HarmonyOS`                                                                                    |
+| 支付宝 `alipay` | `description` 最多 256 个字符，`amount` 最大为 100000000 元，`attach` 经 URL 编码后最多 512 个字符                                                                                                                              |
+
+应用 AppID、渠道商户号和通知地址由支付服务根据商户渠道配置加载。微信和抖音支持按支付方式配置对应 AppID，JSAPI 的 `openid` 需与最终使用的 AppID 对应。
+
+### 微信 JSAPI 请求示例
+
+```bash
+curl --request POST 'https://pay.example.com/merchant-api/v1/create/order' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --data '{
+    "account": "merchant_demo",
+    "order_no": "ORDER202611180001",
+    "description": "商品订单支付",
+    "amount": 12.50,
+    "openid": "用户在对应AppID下的OpenID",
+    "attach": "业务附加信息",
+    "trade_type": "JSAPI",
+    "channel": "wechat"
+  }'
+```
+
+### 微信 H5 请求示例
+
+```json
+{
+  "account": "merchant_demo",
+  "order_no": "ORDER202611180002",
+  "description": "商品订单支付",
+  "amount": 12.50,
+  "trade_type": "H5",
+  "channel": "wechat",
+  "payer_client_ip": "203.0.113.10",
+  "h5_type": "Wap"
+}
+```
+
+### 成功响应
+
+HTTP 状态码为 `200`，`code` 为 `0`。
+
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {
+    "outTradeNo": "123456789012345678",
+    "tradeType": "JSAPI",
+    "payParams": {
+      "prepay_id": "wx_example_prepay_id",
+      "appId": "wx_example_appid",
+      "timeStamp": "1794967200",
+      "nonceStr": "example_nonce",
+      "package": "prepay_id=wx_example_prepay_id",
+      "signType": "RSA",
+      "paySign": "支付服务返回的签名"
+    }
+  }
+}
+```
+
+| 字段                | 类型     | 说明                                  |
+|-------------------|--------|-------------------------------------|
+| `code`            | number | `0` 表示成功，其余值为错误码                    |
+| `message`         | string | 成功为 `ok`，失败时返回错误说明                  |
+| `data.outTradeNo` | string | 支付服务生成的支付单号，对应业务回调中的 `out_trade_no` |
+| `data.tradeType`  | string | 本次下单的支付方式                           |
+| `data.payParams`  | object | 对应渠道、支付方式的调起支付参数                    |
+
+创建订单响应字段使用 `outTradeNo`、`tradeType`、`payParams`。`payParams` 内部按以下各支付方式的字段名读取。
+
+### 调起支付参数
+
+#### JSAPI
+
+微信和抖音 JSAPI 返回以下字段，字段值均为字符串。
+
+| 字段          | 说明                            |
+|-------------|-------------------------------|
+| `prepay_id` | 预支付交易会话标识                     |
+| `appId`     | 本次支付使用的应用 AppID               |
+| `timeStamp` | 秒级 Unix 时间戳                   |
+| `nonceStr`  | 随机字符串                         |
+| `package`   | `prepay_id=` 加预支付交易会话标识       |
+| `signType`  | 微信为 `RSA`，抖音为 `DouyinPay-RSA` |
+| `paySign`   | 调起支付签名                        |
+
+微信小程序从中读取 `timeStamp`、`nonceStr`、`package`、`signType`、`paySign`，传给 `wx.requestPayment`。
+
+支付宝 JSAPI 返回以下参数，由客户端传给 `my.tradePay`。
+
+```json
+{
+  "tradeNO": "支付宝交易号"
+}
+```
+
+#### NATIVE
+
+三个渠道均通过 `code_url` 返回二维码内容，由客户端生成支付二维码。
+
+```json
+{
+  "code_url": "渠道返回的二维码链接"
+}
+```
+
+#### H5
+
+三个渠道均通过 `h5_url` 返回支付链接，由浏览器打开。
+
+```json
+{
+  "h5_url": "渠道返回的H5支付链接"
+}
+```
+
+#### APP
+
+微信 APP 参数如下，字段值均为字符串，客户端按平台 SDK 参数名映射。
+
+```json
+{
+  "appId": "wx_example_appid",
+  "partnerId": "微信支付商户号",
+  "prepayId": "预支付交易会话标识",
+  "packageValue": "Sign=WXPay",
+  "nonceStr": "example_nonce",
+  "timeStamp": "1794967200",
+  "sign": "支付服务返回的签名"
+}
+```
+
+抖音 APP 参数如下，字段值均为字符串。
+
+```json
+{
+  "appid": "抖音应用AppID",
+  "partnerid": "抖音支付商户号",
+  "prepayid": "预支付交易会话标识",
+  "package": "Sign=DYPay",
+  "noncestr": "example_nonce",
+  "timestamp": "1794967200",
+  "sign": "支付服务返回的签名"
+}
+```
+
+支付宝 APP 返回完整订单字符串，由客户端交给支付宝支付 SDK。
+
+```json
+{
+  "order_string": "支付服务生成的完整签名订单串"
+}
+```
+
+### 失败响应
+
+```json
+{
+  "code": 16,
+  "message": "无效的访问凭证",
+  "data": {}
+}
+```
+
+| HTTP 状态码 | code       | 常见含义                          |
+|----------|------------|-------------------------------|
+| `400`    | `3`        | 请求 JSON 或渠道下单参数错误             |
+| `400`    | `9`        | 渠道配置或下单前置条件异常                 |
+| `401`    | `16`       | API Key 缺失、无效或所属商户已禁用         |
+| `403`    | `7`        | API Key 所属商户与请求 `account` 不一致 |
+| `429`    | `8`        | 渠道请求频率受限                      |
+| `500`    | `2` 或 `13` | 下单流程或服务内部异常，具体原因见 `message`   |
+| `503`    | `14`       | 鉴权服务、商户配置或支付渠道暂不可用，或下单结果待核实   |
+| `504`    | `4`        | 请求超时                          |
+
+### 订单号与重复请求
+
+`order_no` 由业务方生成。支付服务每次创建订单会生成新的支付单号，并以该支付单号作为渠道下单的 `out_trade_no`。同一业务订单重复调用当前接口可能产生多个支付单，按业务订单号去重的能力尚待实现。
+
+创建成功后保存 `data.outTradeNo`，并复用已取得的支付参数。遇到超时、网络中断或下单结果待核实时，先联系支付服务按已有支付单号核实。响应丢失时可提供 `account`、`order_no` 和请求时间协助定位。
+
+## 支付成功业务回调
+
+### 回调地址与请求格式
+
+支付服务向商户配置的 `pay_merchant.notify_url` 发送 HTTP POST。当前统一业务回调由微信支付成功通知触发。
+
+```http
+POST https://merchant.example.com/payment/notify
+Content-Type: application/json
+```
+
+### 回调参数
+
+| 字段                 | 类型      | 说明                                                |
+|--------------------|---------|---------------------------------------------------|
+| `out_trade_no`     | string  | 支付服务支付单号，与创建订单响应 `data.outTradeNo` 一致，作为本次支付的幂等标识 |
+| `order_no`         | string  | 业务订单号，与创建订单请求 `order_no` 一致                       |
+| `merchant_account` | string  | 商户账号，与创建订单请求 `account` 一致                         |
+| `trade_no`         | string  | 微信支付渠道交易号                                         |
+| `channel`          | string  | 当前为 `wechat`                                      |
+| `status`           | string  | 当前为 `SUCCESS`，表示支付成功                              |
+| `total_amount`     | integer | 订单总金额，单位为分，例如下单 `amount = 12.50` 对应 `1250`        |
+| `pay_amount`       | integer | 用户实付金额，单位为分，优惠场景下可能小于订单总金额                        |
+| `pay_time`         | string  | 支付成功时间，RFC3339 格式，例如 `2026-11-18T10:00:00+08:00`  |
+| `open_id`          | string  | 付款用户在对应应用下的 OpenID                                |
+| `trade_type`       | string  | 微信回调中的交易类型，沿用渠道原值，H5 支付可能为 `MWEB`                 |
+
+创建订单的 `amount` 使用元，业务回调中的 `total_amount`、`pay_amount` 使用整数分。业务关联时同时核对商户账号、业务订单号和订单总金额。
+
+### 回调示例
+
+```json
+{
+  "out_trade_no": "123456789012345678",
+  "order_no": "ORDER202611180001",
+  "merchant_account": "merchant_demo",
+  "trade_no": "4200000000000000000000000000",
+  "channel": "wechat",
+  "status": "SUCCESS",
+  "total_amount": 1250,
+  "pay_amount": 1250,
+  "pay_time": "2026-11-18T10:00:00+08:00",
+  "open_id": "用户在对应AppID下的OpenID",
+  "trade_type": "JSAPI"
+}
+```
+
+### 接收应答与重复通知
+
+- 业务端处理成功后返回 HTTP `200` 或 `204` 等任意 `2xx` 状态码，响应体可为空，支付服务根据 HTTP 状态码确认投递结果。
+- 单次通知请求超时为 2 秒，`3xx` 跳转和其余非 `2xx` 状态码均按投递失败处理。
+- 按 `out_trade_no` 幂等处理同一支付结果，重复通知应返回成功应答。业务处理成功后应答丢失，或支付服务保存投递结果失败，均可能造成再次通知。
+- 投递成功后，支付服务将该支付单的业务通知状态标记为 `SUCCESS`。已成功投递的支付单收到重复渠道通知时会跳过业务投递。
+- 投递失败后保留 `PENDING` 状态。当前定时补发功能待实现，后续再次收到该支付单的有效渠道通知时会尝试投递，失败记录需由支付服务跟进处理。
+
+成功应答示例如下。
+
+```http
+HTTP/1.1 204 No Content
+```
+
+### 回调鉴权
+
+当前业务通知请求使用 `Content-Type: application/json`，业务回调签名及专用鉴权头的协议尚待实现。创建订单使用的 Bearer API Key 用于业务方向支付服务发起请求。
+
+## 微信渠道通知地址
+
+支付服务接收微信渠道通知的实际路由如下，渠道配置中的 `notify_url` 应填写该地址，并替换对应商户账号。
+
+```http
+POST https://pay.example.com/payment-api/v1/wechat/pay/notify/{merchant_account}
+```
+
+该入口接收微信原始通知请求体及 `Wechatpay-Serial`、`Wechatpay-Signature`、`Wechatpay-Timestamp`、`Wechatpay-Nonce` 请求头，由支付服务验签、解密并处理支付结果，再投递前述业务回调。
+
+渠道通知地址配置在 `pay_merchant_channel.config.notify_url`，商户业务通知地址配置在 `pay_merchant.notify_url`。支付宝和抖音的异步通知由各自渠道配置的 `notify_url` 接收，对应统一业务回调处理仍待接入。
+
+## 文档核对范围
+
+字段与行为按当前路由、Protobuf、鉴权中间件、下单及通知实现核对。本文示例用于说明请求和响应格式，实际服务地址、商户配置及渠道支付结果需在对应环境联调确认。
