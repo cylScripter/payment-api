@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -17,6 +16,7 @@ import (
 	"payment-api/internal/router"
 	"payment-api/internal/rpc"
 
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 )
 
@@ -32,7 +32,7 @@ func run() error {
 	}
 	defer func() {
 		if err := initials.Close(); err != nil {
-			log.Printf("关闭基础组件失败: %v", err)
+			log.Infof("关闭基础组件失败: %v", err)
 		}
 	}()
 	port := os.Getenv("PORT")
@@ -47,7 +47,7 @@ func run() error {
 	defer func(httpListener net.Listener) {
 		err := httpListener.Close()
 		if err != nil {
-			log.Println("关闭 HTTP 端口失败:", err)
+			log.Infof("关闭 HTTP 端口失败: %v", err)
 		}
 	}(httpListener)
 	rpcListener, err := net.Listen("tcp", config.Get().RPC.Addr)
@@ -57,7 +57,7 @@ func run() error {
 	defer func(rpcListener net.Listener) {
 		err := rpcListener.Close()
 		if err != nil {
-			log.Println("关闭 RPC 端口失败:", err)
+			log.Infof("关闭 RPC 端口失败: %v", err)
 		}
 	}(rpcListener)
 
@@ -70,7 +70,7 @@ func run() error {
 	serveErr := make(chan error, 2)
 	go func() { serveErr <- httpServer.Serve(httpListener) }()
 	go func() { serveErr <- rpcServer.Serve(rpcListener) }()
-	log.Printf("HTTP listening on %s, RPC listening on %s", httpListener.Addr(), rpcListener.Addr())
+	log.Infof("HTTP listening on %s, RPC listening on %s", httpListener.Addr(), rpcListener.Addr())
 
 	select {
 	case <-ctx.Done():

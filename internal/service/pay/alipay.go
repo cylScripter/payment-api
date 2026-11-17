@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
@@ -20,6 +19,7 @@ import (
 	"payment-api/internal/models"
 
 	"github.com/shopspring/decimal"
+	log "github.com/sirupsen/logrus"
 	"github.com/smartwalle/alipay/v3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -245,14 +245,14 @@ func (p *AlipayPayer) App(ctx context.Context) error {
 func (p *AlipayPayer) finish(ctx context.Context, err error) error {
 	var apiErr *alipay.Error
 	errors.As(err, &apiErr)
-	slog.InfoContext(ctx, "alipay order",
-		"out_trade_no", p.order.PayNo,
-		"trade_type", p.order.Request.TradeType,
-		"elapsed", time.Since(p.started),
-		"http_status", p.httpStatus,
-		"success", err == nil,
-		"error_type", fmt.Sprintf("%T", err),
-	)
+	log.WithContext(ctx).WithFields(log.Fields{
+		"out_trade_no": p.order.PayNo,
+		"trade_type":   p.order.Request.TradeType,
+		"elapsed":      time.Since(p.started),
+		"http_status":  p.httpStatus,
+		"success":      err == nil,
+		"error_type":   fmt.Sprintf("%T", err),
+	}).Info("alipay order")
 	if err == nil {
 		return nil
 	}

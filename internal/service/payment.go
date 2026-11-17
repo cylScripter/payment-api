@@ -8,7 +8,7 @@ import (
 	"payment-api/internal/service/notify"
 	"payment-api/internal/service/pay"
 
-	"github.com/cloudwego/kitex/tool/internal_pkg/log"
+	log "github.com/sirupsen/logrus"
 )
 
 type Payment struct {

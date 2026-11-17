@@ -20,6 +20,7 @@ var (
 
 func Init(sources ...config.Source) error {
 	once.Do(func() {
+		InitLogger()
 		if initErr = config.Init(sources...); initErr != nil {
 			return
 		}

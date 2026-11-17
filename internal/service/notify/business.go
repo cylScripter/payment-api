@@ -11,7 +11,7 @@ import (
 
 	"payment-api/internal/repo"
 
-	"github.com/cloudwego/kitex/tool/internal_pkg/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // BusinessNotify 金额均为整数分，业务方按 PayNo 幂等处理。

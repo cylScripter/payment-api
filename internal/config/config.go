@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/go-viper/mapstructure/v2"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -119,7 +119,7 @@ func Watch(apply func(Config) error) (func(), error) {
 				}
 				if err != nil {
 					if err.Error() != lastError {
-						slog.Error("配置更新失败，继续使用当前配置", "error", err)
+						log.WithError(err).Error("配置更新失败，继续使用当前配置")
 					}
 					lastError = err.Error()
 					continue

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"math/big"
 	"net"
 	"payment-api/internal/pkg/pay/wechatpay"
@@ -19,6 +18,7 @@ import (
 	paymentv1 "payment-api/api/payment/v1"
 	"payment-api/internal/models"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/app"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/h5"
@@ -308,10 +308,16 @@ func (p *WechatPayer) finish(ctx context.Context, result *core.APIResult, err er
 	if errors.As(err, &apiErr) {
 		apiCode = apiErr.Code
 	}
-	slog.InfoContext(ctx, "wechatpay order", "out_trade_no", p.order.Request.OrderNo,
-		"trade_type", p.order.Request.TradeType, "elapsed", time.Since(p.started),
-		"request_id", requestID, "http_status", httpStatus, "code", apiCode,
-		"success", err == nil, "error_type", fmt.Sprintf("%T", err))
+	log.WithContext(ctx).WithFields(log.Fields{
+		"out_trade_no": p.order.Request.OrderNo,
+		"trade_type":   p.order.Request.TradeType,
+		"elapsed":      time.Since(p.started),
+		"request_id":   requestID,
+		"http_status":  httpStatus,
+		"code":         apiCode,
+		"success":      err == nil,
+		"error_type":   fmt.Sprintf("%T", err),
+	}).Info("wechatpay order")
 	if err == nil {
 		return nil
 	}

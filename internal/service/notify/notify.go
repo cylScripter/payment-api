@@ -2,7 +2,8 @@ package notify
 
 import (
 	"context"
-	"log/slog"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Notifier 由各支付渠道实现，每次回调创建独立对象。
@@ -27,7 +28,7 @@ func Handle(ctx context.Context, notifier Notifier) error {
 		}
 	}
 	if err := notifier.NotifyBusiness(ctx); err != nil {
-		slog.ErrorContext(ctx, "业务通知失败，等待后台重试", "error", err)
+		log.WithContext(ctx).WithError(err).Error("业务通知失败，等待后台重试")
 	}
 	return nil
 }

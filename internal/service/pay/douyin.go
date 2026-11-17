@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"math"
 	"net"
 	"net/http"
@@ -31,6 +30,7 @@ import (
 	"github.com/douyinpay/douyinpay-go/tools/auth/verifiers"
 	"github.com/douyinpay/douyinpay-go/utils"
 	"github.com/shopspring/decimal"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -352,16 +352,16 @@ func (p *DouyinPayer) finish(ctx context.Context, result *client.APIResult, err 
 	if errors.As(err, &apiErr) {
 		apiCode = apiErr.Code
 	}
-	slog.InfoContext(ctx, "douyinpay order",
-		"out_trade_no", p.order.PayNo,
-		"trade_type", p.order.Request.TradeType,
-		"elapsed", time.Since(p.started),
-		"request_id", requestID,
-		"http_status", httpStatus,
-		"code", apiCode,
-		"success", err == nil,
-		"error_type", fmt.Sprintf("%T", err),
-	)
+	log.WithContext(ctx).WithFields(log.Fields{
+		"out_trade_no": p.order.PayNo,
+		"trade_type":   p.order.Request.TradeType,
+		"elapsed":      time.Since(p.started),
+		"request_id":   requestID,
+		"http_status":  httpStatus,
+		"code":         apiCode,
+		"success":      err == nil,
+		"error_type":   fmt.Sprintf("%T", err),
+	}).Info("douyinpay order")
 	if err == nil {
 		return nil
 	}
