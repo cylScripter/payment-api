@@ -1,113 +1,35 @@
-# Implementation Plan: [FEATURE]
+# 实现计划：[功能名称]
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**分支**：`[###-feature-name]` | **日期**：[DATE] | **规格**：[链接]
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+## 概述
 
-**Note**: This template is filled in by the `$speckit-plan` command; its definition describes the execution workflow.
+[一段话：主要需求 + 技术方案。沿用项目现有分层和实现方式，不引入新的框架或抽象]
 
-## Summary
+## 技术上下文
 
-[Extract from feature spec: primary requirement + technical approach from research]
+- **语言/版本**：Go（版本以 `go.mod` 为准），HTTP 用 Gin，RPC 用 gRPC
+- **存储**：MySQL（GORM），迁移 SQL 放 `migrations/`
+- **验证**：`go build ./...`、`go vet ./...`，按需运行现有测试
 
-## Technical Context
+## 涉及模块
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
-
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
-
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
-
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
-
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
-
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
-
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
-
-## Constitution Check
-
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-[Gates determined based on constitution file]
-
-## Project Structure
-
-### Documentation (this feature)
+[列出本次实际会改动的目录，未涉及的删除]
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file ($speckit-plan command output)
-├── research.md          # Phase 0 output ($speckit-plan command)
-├── data-model.md        # Phase 1 output ($speckit-plan command)
-├── quickstart.md        # Phase 1 output ($speckit-plan command)
-├── contracts/           # Phase 1 output ($speckit-plan command)
-└── tasks.md             # Phase 2 output ($speckit-tasks command - NOT created by $speckit-plan)
+api/<业务>/v1/           # proto 定义（改动后执行 make proto）
+internal/models/         # 数据模型（gorm 标签、TableName()）
+internal/repo/           # 数据库访问（MySQLXxx + ReqXxx option 模式）
+internal/service/        # 业务逻辑（HTTP 与 RPC 复用）
+internal/controllers/    # HTTP 请求绑定与响应
+internal/router/router.go / internal/rpc/server.go  # 路由与 RPC 注册
+migrations/              # 数据库变更 SQL
 ```
 
-### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
+## 复用与约定
 
-```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+[说明复用了哪些现有逻辑、类型和调用方式；沿用哪些既有写法。无特殊说明时写"按项目协作约定与宪章执行"]
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+## 复杂度说明
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
-```
-
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
-
-## Complexity Tracking
-
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+[仅在实现偏离项目约定时填写偏离点及原因，否则写"无"]

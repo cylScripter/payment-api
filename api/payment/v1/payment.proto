@@ -27,7 +27,6 @@ message CreateOrderReq {
   string trade_type = 6;  //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
 
 
-
   string channel = 7;      //  渠道（可选) 默认微信 wechat
   string merchant_account = 8; //  商户账号
   string payer_client_ip = 9; //  用户终端 IP，H5 必填
