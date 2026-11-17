@@ -1,0 +1,72 @@
+# 部署前在 open-prod 命名空间创建 registry-secret 镜像拉取凭据。
+# 节点容器运行时需允许访问 HTTP 仓库 114.132.181.123:50000。
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-api
+  namespace: open-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-api
+  template:
+    metadata:
+      labels:
+        app: payment-api
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: payment-api
+          image: 114.132.181.123:50000/open/payment-api:v20261117-112436-main
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: grpc
+              containerPort: 9090
+          env:
+            - name: PORT
+              value: "8080"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-api
+  namespace: open-prod
+spec:
+  type: NodePort
+  selector:
+    app: payment-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+    - name: grpc
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
