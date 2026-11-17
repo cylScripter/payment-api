@@ -1,0 +1,13 @@
+.git
+.gitnexus
+.agents
+.specify
+.idea
+.vscode
+.DS_Store
+.env*
+*.log*
+*.pem
+*.p12
+Dockerfile*
+.dockerignore
