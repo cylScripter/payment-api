@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuthService_WechatLogin_FullMethodName = "/payment.auth.v1.AuthService/WechatLogin"
+	AuthService_GenerateAPIKey_FullMethodName = "/payment.auth.v1.AuthService/GenerateAPIKey"
+	AuthService_WechatLogin_FullMethodName    = "/payment.auth.v1.AuthService/WechatLogin"
 )
 
 // AuthServiceClient is the client API for AuthService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
+	GenerateAPIKey(ctx context.Context, in *GenerateAPIKeyReq, opts ...grpc.CallOption) (*GenerateAPIKeyResp, error)
 	WechatLogin(ctx context.Context, in *WechatLoginRequest, opts ...grpc.CallOption) (*WechatLoginResponse, error)
 }
 
@@ -35,6 +37,16 @@ type authServiceClient struct {
 
 func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
+}
+
+func (c *authServiceClient) GenerateAPIKey(ctx context.Context, in *GenerateAPIKeyReq, opts ...grpc.CallOption) (*GenerateAPIKeyResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GenerateAPIKeyResp)
+	err := c.cc.Invoke(ctx, AuthService_GenerateAPIKey_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *authServiceClient) WechatLogin(ctx context.Context, in *WechatLoginRequest, opts ...grpc.CallOption) (*WechatLoginResponse, error) {
@@ -51,6 +63,7 @@ func (c *authServiceClient) WechatLogin(ctx context.Context, in *WechatLoginRequ
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
+	GenerateAPIKey(context.Context, *GenerateAPIKeyReq) (*GenerateAPIKeyResp, error)
 	WechatLogin(context.Context, *WechatLoginRequest) (*WechatLoginResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -62,6 +75,9 @@ type AuthServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAuthServiceServer struct{}
 
+func (UnimplementedAuthServiceServer) GenerateAPIKey(context.Context, *GenerateAPIKeyReq) (*GenerateAPIKeyResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method GenerateAPIKey not implemented")
+}
 func (UnimplementedAuthServiceServer) WechatLogin(context.Context, *WechatLoginRequest) (*WechatLoginResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method WechatLogin not implemented")
 }
@@ -84,6 +100,24 @@ func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&AuthService_ServiceDesc, srv)
+}
+
+func _AuthService_GenerateAPIKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateAPIKeyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GenerateAPIKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GenerateAPIKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GenerateAPIKey(ctx, req.(*GenerateAPIKeyReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_WechatLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -111,6 +145,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "payment.auth.v1.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GenerateAPIKey",
+			Handler:    _AuthService_GenerateAPIKey_Handler,
+		},
 		{
 			MethodName: "WechatLogin",
 			Handler:    _AuthService_WechatLogin_Handler,

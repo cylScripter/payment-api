@@ -9,7 +9,7 @@ func applyConfig(next config.Config) error {
 	if err := wechat.Validate(next.Wechat); err != nil {
 		return err
 	}
-	if err := InitDatabase(next.Database); err != nil {
+	if err := InitDatabase(next); err != nil {
 		return err
 	}
 	return nil

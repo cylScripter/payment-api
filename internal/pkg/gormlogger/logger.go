@@ -66,13 +66,13 @@ func (l *Logger) Trace(ctx context.Context, begin time.Time, query func() (strin
 	switch {
 	case err != nil && l.config.LogLevel >= logger.Error && (!errors.Is(err, gorm.ErrRecordNotFound) || !l.config.IgnoreRecordNotFoundError):
 		sql, rows := query()
-		entry.Errorf("GORM query failed: %v; elapsed=%s; rows=%d; sql=%s", err, elapsed, rows, sql)
+		entry.Errorf("[GORM] query failed: %v; elapsed=%s; rows=%d; sql=%s", err, elapsed, rows, sql)
 	case l.config.SlowThreshold > 0 && elapsed > l.config.SlowThreshold && l.config.LogLevel >= logger.Warn:
 		sql, rows := query()
-		entry.Warnf("GORM slow query: elapsed=%s; threshold=%s; rows=%d; sql=%s", elapsed, l.config.SlowThreshold, rows, sql)
+		entry.Warnf("[GORM] slow query: elapsed=%s; threshold=%s; rows=%d; sql=%s", elapsed, l.config.SlowThreshold, rows, sql)
 	case l.config.LogLevel >= logger.Info:
 		sql, rows := query()
-		entry.Infof("GORM query: elapsed=%s; rows=%d; sql=%s", elapsed, rows, sql)
+		entry.Infof("[GORM] query: elapsed=%s; rows=%d; sql=%s", elapsed, rows, sql)
 	}
 }
 

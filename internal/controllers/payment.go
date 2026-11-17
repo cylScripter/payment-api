@@ -12,7 +12,11 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-func (c Controller) CreateOrder(ctx *gin.Context) {
+type PaymentController struct {
+	Controller
+}
+
+func (c PaymentController) CreateOrder(ctx *gin.Context) {
 	data, err := ctx.GetRawData()
 	if err != nil {
 		c.Response(ctx, nil, status.Error(codes.InvalidArgument, "读取请求体失败"))
@@ -28,7 +32,7 @@ func (c Controller) CreateOrder(ctx *gin.Context) {
 	c.Response(ctx, resp, err)
 }
 
-func (c Controller) WxPayNotify(ctx *gin.Context) {
+func (c PaymentController) WxPayNotify(ctx *gin.Context) {
 	body, err := ctx.GetRawData()
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+	"unicode"
 
 	"github.com/go-viper/mapstructure/v2"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +30,17 @@ type DataConfig struct {
 	MaxConn         int32  `yaml:"max_conn"`
 }
 
+type RedisConfig struct {
+	Host      string `yaml:"host"`
+	Port      int32  `yaml:"port"`
+	Password  string `yaml:"password"`
+	MaxActive int32  `yaml:"max_active"`
+	MaxIdle   int32  `yaml:"max_idle"`
+	DbNum     int32  `yaml:"db_num"`
+	Wait      bool   `yaml:"wait"`
+	Timeout   int32  `yaml:"timeout"`
+}
+
 type RPC struct {
 	Addr string `yaml:"addr"`
 }
@@ -37,11 +50,17 @@ type Wechat struct {
 	AppSecret string `yaml:"app_secret"`
 }
 
+type Auth struct {
+	AdminKey string `yaml:"admin_key"`
+}
+
 type Config struct {
-	EncryptKey string     `yaml:"encrypt_key"` // 数据加解密口令，加密时通过PBKDF2派生AES密钥。
-	RPC        RPC        `yaml:"rpc"`
-	Wechat     Wechat     `yaml:"wechat"`
-	Database   DataConfig `yaml:"database"`
+	EncryptKey string      `yaml:"encrypt_key"` // 数据加解密口令，加密时通过PBKDF2派生AES密钥。
+	RPC        RPC         `yaml:"rpc"`
+	Wechat     Wechat      `yaml:"wechat"`
+	Database   DataConfig  `yaml:"database"`
+	Auth       Auth        `yaml:"auth"`
+	Redis      RedisConfig `yaml:"redis"`
 }
 
 var (
@@ -164,6 +183,9 @@ func reload(ctx context.Context, next Source) error {
 		options.WeaklyTypedInput = false
 	}); err != nil {
 		return errors.New("配置字段名称或类型错误")
+	}
+	if strings.IndexFunc(cfg.Auth.AdminKey, unicode.IsSpace) >= 0 || strings.Contains(cfg.Auth.AdminKey, ",") {
+		return errors.New("auth.admin_key 必须为单个不含空白及逗号的凭证")
 	}
 	if cfg.RPC.Addr == "" {
 		cfg.RPC.Addr = ":9090"

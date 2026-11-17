@@ -4,11 +4,11 @@
 
 ## 1. HTTP 认证及商户归属
 
-**决策** 在独立的 `internal/middleware` 包提供 HTTP 鉴权中间件，按方法及 Gin 路由模板精确匹配豁免规则。中间件校验密钥及所属商户状态，从请求参数读取商户号并完成权限比对，通过后调用 `ctx.Next()`。商户号通过现有请求类型字段传递给业务处理。
+**决策** 在独立的 `internal/middleware` 包提供 Auth 和 AdminAuth，由 router 的公开、商户、支付及管理分组选择挂载。中间件校验密钥及所属商户状态，从请求参数读取商户号并完成权限比对，通过后调用 `ctx.Next()`。商户号通过现有请求类型字段传递给业务处理。
 
-**依据** 用户明确要求中间件完成权限校验后放行，商户号由参数传递。当前下单请求包含 `merchant_account`，中间件可使用现有完整 `CreateOrderReq` 和与 controller 一致的 protojson 选项解析。这样能覆盖 `merchant_account`、`merchantAccount` 两种命名及重复字段处理，避免两层解析语义分歧。解析后通过 `io.NopCloser(bytes.NewReader(body))` 恢复原始请求体，供 controller 再次读取。
+**依据** 用户明确要求中间件完成权限校验后放行，商户号由参数传递。中间件通过 encoding/json 读取通用 merchant_account 字段，兼容 merchantAccount。其他业务字段作为原始 JSON 保留，由 controller 按各自接口契约绑定。解析后通过 `io.NopCloser(bytes.NewReader(body))` 恢复原始请求体，供 controller 再次读取。
 
-**评估方案** 中间件按现有 proto 请求校验参数、controller 绑定后授权、service 执行归属检查。采用中间件完成权限检查及请求体恢复的方案。
+**评估方案** 中间件读取通用商户参数、controller 绑定后授权、service 执行归属检查。采用中间件完成权限检查及请求体恢复的方案。
 
 ## 2. 首把密钥及签发接口
 
@@ -36,7 +36,7 @@
 
 ## 5. 商户归属及历史数据
 
-**决策** 密钥保存 `pay_merchant.id`，校验时读取当前账号和状态。签发发现同账号多条商户记录时返回 409。正常业务数据以商户账号唯一为前提，联调前核对所用商户账号。
+**决策** 密钥保存 `pay_merchant.id`，校验时读取当前账号和状态。签发发现同账号多条商户记录时返回统一的签发失败。正常业务数据以商户账号唯一为前提，联调前核对所用商户账号。
 
 **依据** 现有商户表的账号字段没有唯一索引，但业务按账号选取商户。主键关联能准确区分删除后重建的商户。账号歧义作为签发冲突处理，可避免把新密钥绑定到任意一条历史记录。
 
@@ -52,9 +52,9 @@
 
 ## 7. Protobuf 契约及服务注册
 
-**决策** 按用户补充要求，在现有 `api/auth/v1/auth.proto` 的 `AuthService` 增加 `GenerateAPIKey`，请求和响应分别命名为 `GenerateAPIKeyReq`、`GenerateAPIKeyResp`，添加 HTTP 注解并手动注册 HTTP 路由。复用 `service.Auth` 实现签发和身份认证，实施阶段通过 `make proto` 更新生成代码。
+**决策** 按用户补充要求，在现有 `api/auth/v1/auth.proto` 的 `AuthService` 增加 `GenerateAPIKey`，请求和响应分别命名为 `GenerateAPIKeyReq`、`GenerateAPIKeyResp`，添加 HTTP 注解并手动注册 HTTP 路由。复用 `service.Auth` 实现签发业务，中间件负责身份和权限校验，实施阶段通过 `make proto` 更新生成代码。
 
-**依据** 用户明确要求复用现有 proto service。当前 `AuthService` 已注册 gRPC，签发方法会通过现有注册同时对外提供。因此 `Auth.GenerateAPIKey` 在执行签发前校验管理凭证，HTTP controller 传递的 context 与 RPC incoming metadata 均采用 `authorization`。HTTP 中间件先做管理授权，service 中的授权检查覆盖两个调用入口，沿用规格 FR-2 的签发规则。
+**依据** 用户明确要求复用现有 proto service。当前 `AuthService` 已注册 gRPC，签发方法会通过现有注册同时对外提供。HTTP 的 AdminAuth 直接校验 Authorization 请求头，RPC 入口针对签发方法校验 incoming metadata。二者调用同一 middleware.AuthorizeAdmin(ctx, values)，通过后进入 Auth.GenerateAPIKey 处理业务，沿用规格 FR-2 的签发规则。
 
 **评估方案** 扩展现有 AuthService、只增加消息定义。采用现有 AuthService 中增加方法和消息的方案。
 

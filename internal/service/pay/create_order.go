@@ -41,7 +41,7 @@ type CreateOrderHandler struct {
 func WithRequest(req *paymentv1.CreateOrderReq) func(c *CreateOrderHandler) {
 	return func(c *CreateOrderHandler) {
 		c.Order.Request = req
-		c.account = req.MerchantAccount
+		c.account = req.Account
 	}
 }
 

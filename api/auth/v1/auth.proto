@@ -7,6 +7,13 @@ import "google/api/annotations.proto";
 option go_package = "payment-api/api/auth/v1;authv1";
 
 service AuthService {
+  rpc GenerateAPIKey(GenerateAPIKeyReq) returns (GenerateAPIKeyResp) {
+    option (google.api.http) = {
+      post: "/v1/auth/api-keys"
+      body: "*"
+    };
+  }
+
   rpc WechatLogin(WechatLoginRequest) returns (WechatLoginResponse) {
     option (google.api.http) = {
       post: "/v1/auth/wechat/login"
@@ -22,4 +29,13 @@ message WechatLoginRequest {
 
 message WechatLoginResponse {
   string openid = 1;
+}
+
+message GenerateAPIKeyReq {
+  string merchant_account = 1 [json_name = "merchant_account"];
+}
+
+message GenerateAPIKeyResp {
+  string api_key = 1 [json_name = "api_key"];
+  string merchant_account = 2 [json_name = "merchant_account"];
 }

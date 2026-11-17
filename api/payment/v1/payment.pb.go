@@ -119,19 +119,19 @@ func (*WxPayNotifyResp) Descriptor() ([]byte, []int) {
 }
 
 type CreateOrderReq struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	OrderNo         string                 `protobuf:"bytes,1,opt,name=order_no,json=orderNo,proto3" json:"order_no,omitempty"`                         //  业务订单号
-	Description     string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`                                //  订单描述
-	Amount          float32                `protobuf:"fixed32,3,opt,name=amount,proto3" json:"amount,omitempty"`                                        //  订单金额 单位：元 (保留两位小数)
-	Openid          string                 `protobuf:"bytes,4,opt,name=openid,proto3" json:"openid,omitempty"`                                          //  用户标识，小程序下单需要。支付宝对应当前应用下的 buyer_open_id
-	Attach          string                 `protobuf:"bytes,5,opt,name=attach,proto3" json:"attach,omitempty"`                                          //  附加数据（可选）
-	TradeType       string                 `protobuf:"bytes,6,opt,name=trade_type,json=tradeType,proto3" json:"trade_type,omitempty"`                   //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
-	Channel         string                 `protobuf:"bytes,7,opt,name=channel,proto3" json:"channel,omitempty"`                                        //  渠道（可选) 默认微信 wechat
-	MerchantAccount string                 `protobuf:"bytes,8,opt,name=merchant_account,json=merchantAccount,proto3" json:"merchant_account,omitempty"` //  商户账号
-	PayerClientIp   string                 `protobuf:"bytes,9,opt,name=payer_client_ip,json=payerClientIp,proto3" json:"payer_client_ip,omitempty"`     //  用户终端 IP，H5 必填
-	H5Type          string                 `protobuf:"bytes,10,opt,name=h5_type,json=h5Type,proto3" json:"h5_type,omitempty"`                           //  H5 场景类型，Wap、iOS、Android，抖音还支持 HarmonyOS
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	OrderNo       string                 `protobuf:"bytes,1,opt,name=order_no,json=orderNo,proto3" json:"order_no,omitempty"`                     //  业务订单号
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`                            //  订单描述
+	Amount        float32                `protobuf:"fixed32,3,opt,name=amount,proto3" json:"amount,omitempty"`                                    //  订单金额 单位：元 (保留两位小数)
+	Openid        string                 `protobuf:"bytes,4,opt,name=openid,proto3" json:"openid,omitempty"`                                      //  用户标识，小程序下单需要。支付宝对应当前应用下的 buyer_open_id
+	Attach        string                 `protobuf:"bytes,5,opt,name=attach,proto3" json:"attach,omitempty"`                                      //  附加数据（可选）
+	TradeType     string                 `protobuf:"bytes,6,opt,name=trade_type,json=tradeType,proto3" json:"trade_type,omitempty"`               //  支付方式  JSAPI 小程序支付 APP APP支付 NATIVE 扫码支付  H5 H5支付
+	Channel       string                 `protobuf:"bytes,7,opt,name=channel,proto3" json:"channel,omitempty"`                                    //  渠道（可选) 默认微信 wechat
+	Account       string                 `protobuf:"bytes,8,opt,name=account,proto3" json:"account,omitempty"`                                    //  商户账号
+	PayerClientIp string                 `protobuf:"bytes,9,opt,name=payer_client_ip,json=payerClientIp,proto3" json:"payer_client_ip,omitempty"` //  用户终端 IP，H5 必填
+	H5Type        string                 `protobuf:"bytes,10,opt,name=h5_type,json=h5Type,proto3" json:"h5_type,omitempty"`                       //  H5 场景类型，Wap、iOS、Android，抖音还支持 HarmonyOS
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateOrderReq) Reset() {
@@ -213,9 +213,9 @@ func (x *CreateOrderReq) GetChannel() string {
 	return ""
 }
 
-func (x *CreateOrderReq) GetMerchantAccount() string {
+func (x *CreateOrderReq) GetAccount() string {
 	if x != nil {
-		return x.MerchantAccount
+		return x.Account
 	}
 	return ""
 }
@@ -771,7 +771,7 @@ const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x11\n" +
-	"\x0fWxPayNotifyResp\"\xba\x02\n" +
+	"\x0fWxPayNotifyResp\"\xa9\x02\n" +
 	"\x0eCreateOrderReq\x12\x19\n" +
 	"\border_no\x18\x01 \x01(\tR\aorderNo\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x16\n" +
@@ -780,8 +780,8 @@ const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\x06attach\x18\x05 \x01(\tR\x06attach\x12\x1d\n" +
 	"\n" +
 	"trade_type\x18\x06 \x01(\tR\ttradeType\x12\x18\n" +
-	"\achannel\x18\a \x01(\tR\achannel\x12)\n" +
-	"\x10merchant_account\x18\b \x01(\tR\x0fmerchantAccount\x12&\n" +
+	"\achannel\x18\a \x01(\tR\achannel\x12\x18\n" +
+	"\aaccount\x18\b \x01(\tR\aaccount\x12&\n" +
 	"\x0fpayer_client_ip\x18\t \x01(\tR\rpayerClientIp\x12\x17\n" +
 	"\ah5_type\x18\n" +
 	" \x01(\tR\x06h5Type\"\x8a\x01\n" +

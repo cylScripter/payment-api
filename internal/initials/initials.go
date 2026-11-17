@@ -11,11 +11,12 @@ import (
 )
 
 var (
-	once       sync.Once
-	initErr    error
-	stopWatch  func()
-	stopNotify func()
-	closeMu    sync.Mutex
+	once        sync.Once
+	initErr     error
+	stopWatch   func()
+	stopNotify  func()
+	stopAPIKeys func()
+	closeMu     sync.Mutex
 )
 
 func Init(sources ...config.Source) error {
@@ -27,11 +28,17 @@ func Init(sources ...config.Source) error {
 		if initErr = wechat.Init(); initErr != nil {
 			return
 		}
-		if initErr = InitDatabase(config.Get().Database); initErr != nil {
+		if initErr = InitDatabase(config.Get()); initErr != nil {
+			return
+		}
+		stopAPIKeys, initErr = startAPIKeySync()
+		if initErr != nil {
+			_ = gormhelper.ClientInstance.Close()
 			return
 		}
 		stopWatch, initErr = config.Watch(applyConfig)
 		if initErr != nil {
+			stopAPIKeys()
 			_ = gormhelper.ClientInstance.Close()
 			return
 		}
@@ -58,6 +65,10 @@ func Close() error {
 	if stopWatch != nil {
 		stopWatch()
 		stopWatch = nil
+	}
+	if stopAPIKeys != nil {
+		stopAPIKeys()
+		stopAPIKeys = nil
 	}
 	return gormhelper.ClientInstance.Close()
 }

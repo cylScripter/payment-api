@@ -6,6 +6,7 @@ import (
 	"payment-api/internal/config"
 	"payment-api/internal/pkg/gormhelper"
 	"payment-api/internal/pkg/gormlogger"
+	"payment-api/internal/pkg/rediscache"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -17,6 +18,7 @@ const (
 
 type Data struct {
 	database *gormhelper.Client
+	redis    rediscache.CacheClient
 }
 
 func (d *Data) LoadDatabase(database string) (*gorm.DB, error) {
@@ -53,9 +55,30 @@ func NewDataBaseClient(c *config.DataConfig, log logger.Interface) *gormhelper.C
 	return client
 }
 
-func NewData(c *config.DataConfig) *Data {
+func NewData(c *config.Config) *Data {
 	log := gormlogger.New()
 	return &Data{
-		database: NewDataBaseClient(c, log),
+		database: NewDataBaseClient(&c.Database, log),
+		redis:    NewRedisClient(&c.Redis),
 	}
+}
+func (d *Data) Redis() *rediscache.CacheClient {
+	return &d.redis
+}
+
+func NewRedisClient(c *config.RedisConfig) rediscache.CacheClient {
+	cfg := rediscache.RedisConfig{
+		MaxActive:   int(c.MaxActive),
+		MaxIdle:     int(c.MaxIdle),
+		Wait:        c.Wait,
+		Host:        c.Host,
+		Port:        int(c.Port),
+		Password:    c.Password,
+		DbNum:       int(c.DbNum),
+		Timeout:     int(c.Timeout),
+		RequirePass: c.Password != "",
+	}
+	client := rediscache.RedisCacheClient(cfg)
+	rediscache.NewRedisCacheClient(client)
+	return client
 }

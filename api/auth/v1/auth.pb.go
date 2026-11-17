@@ -111,6 +111,102 @@ func (x *WechatLoginResponse) GetOpenid() string {
 	return ""
 }
 
+type GenerateAPIKeyReq struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	MerchantAccount string                 `protobuf:"bytes,1,opt,name=merchant_account,proto3" json:"merchant_account,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GenerateAPIKeyReq) Reset() {
+	*x = GenerateAPIKeyReq{}
+	mi := &file_api_auth_v1_auth_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateAPIKeyReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateAPIKeyReq) ProtoMessage() {}
+
+func (x *GenerateAPIKeyReq) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_v1_auth_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateAPIKeyReq.ProtoReflect.Descriptor instead.
+func (*GenerateAPIKeyReq) Descriptor() ([]byte, []int) {
+	return file_api_auth_v1_auth_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *GenerateAPIKeyReq) GetMerchantAccount() string {
+	if x != nil {
+		return x.MerchantAccount
+	}
+	return ""
+}
+
+type GenerateAPIKeyResp struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ApiKey          string                 `protobuf:"bytes,1,opt,name=api_key,proto3" json:"api_key,omitempty"`
+	MerchantAccount string                 `protobuf:"bytes,2,opt,name=merchant_account,proto3" json:"merchant_account,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *GenerateAPIKeyResp) Reset() {
+	*x = GenerateAPIKeyResp{}
+	mi := &file_api_auth_v1_auth_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateAPIKeyResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateAPIKeyResp) ProtoMessage() {}
+
+func (x *GenerateAPIKeyResp) ProtoReflect() protoreflect.Message {
+	mi := &file_api_auth_v1_auth_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateAPIKeyResp.ProtoReflect.Descriptor instead.
+func (*GenerateAPIKeyResp) Descriptor() ([]byte, []int) {
+	return file_api_auth_v1_auth_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *GenerateAPIKeyResp) GetApiKey() string {
+	if x != nil {
+		return x.ApiKey
+	}
+	return ""
+}
+
+func (x *GenerateAPIKeyResp) GetMerchantAccount() string {
+	if x != nil {
+		return x.MerchantAccount
+	}
+	return ""
+}
+
 var File_api_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_api_auth_v1_auth_proto_rawDesc = "" +
@@ -119,8 +215,14 @@ const file_api_auth_v1_auth_proto_rawDesc = "" +
 	"\x12WechatLoginRequest\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\tR\x04code\"-\n" +
 	"\x13WechatLoginResponse\x12\x16\n" +
-	"\x06openid\x18\x01 \x01(\tR\x06openid2\x89\x01\n" +
-	"\vAuthService\x12z\n" +
+	"\x06openid\x18\x01 \x01(\tR\x06openid\"?\n" +
+	"\x11GenerateAPIKeyReq\x12*\n" +
+	"\x10merchant_account\x18\x01 \x01(\tR\x10merchant_account\"Z\n" +
+	"\x12GenerateAPIKeyResp\x12\x18\n" +
+	"\aapi_key\x18\x01 \x01(\tR\aapi_key\x12*\n" +
+	"\x10merchant_account\x18\x02 \x01(\tR\x10merchant_account2\x82\x02\n" +
+	"\vAuthService\x12w\n" +
+	"\x0eGenerateAPIKey\x12\".payment.auth.v1.GenerateAPIKeyReq\x1a#.payment.auth.v1.GenerateAPIKeyResp\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/api-keys\x12z\n" +
 	"\vWechatLogin\x12#.payment.auth.v1.WechatLoginRequest\x1a$.payment.auth.v1.WechatLoginResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/v1/auth/wechat/loginB Z\x1epayment-api/api/auth/v1;authv1b\x06proto3"
 
 var (
@@ -135,16 +237,20 @@ func file_api_auth_v1_auth_proto_rawDescGZIP() []byte {
 	return file_api_auth_v1_auth_proto_rawDescData
 }
 
-var file_api_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_api_auth_v1_auth_proto_goTypes = []any{
 	(*WechatLoginRequest)(nil),  // 0: payment.auth.v1.WechatLoginRequest
 	(*WechatLoginResponse)(nil), // 1: payment.auth.v1.WechatLoginResponse
+	(*GenerateAPIKeyReq)(nil),   // 2: payment.auth.v1.GenerateAPIKeyReq
+	(*GenerateAPIKeyResp)(nil),  // 3: payment.auth.v1.GenerateAPIKeyResp
 }
 var file_api_auth_v1_auth_proto_depIdxs = []int32{
-	0, // 0: payment.auth.v1.AuthService.WechatLogin:input_type -> payment.auth.v1.WechatLoginRequest
-	1, // 1: payment.auth.v1.AuthService.WechatLogin:output_type -> payment.auth.v1.WechatLoginResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 0: payment.auth.v1.AuthService.GenerateAPIKey:input_type -> payment.auth.v1.GenerateAPIKeyReq
+	0, // 1: payment.auth.v1.AuthService.WechatLogin:input_type -> payment.auth.v1.WechatLoginRequest
+	3, // 2: payment.auth.v1.AuthService.GenerateAPIKey:output_type -> payment.auth.v1.GenerateAPIKeyResp
+	1, // 3: payment.auth.v1.AuthService.WechatLogin:output_type -> payment.auth.v1.WechatLoginResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -161,7 +267,7 @@ func file_api_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_auth_v1_auth_proto_rawDesc), len(file_api_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

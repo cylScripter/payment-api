@@ -2,6 +2,7 @@ package models
 
 import (
 	"payment-api/internal/pkg/gormhelper"
+	"payment-api/internal/pkg/rediscache"
 
 	"gorm.io/gorm"
 )
@@ -12,4 +13,8 @@ func GetData() *Data { return data }
 
 func PayDb() *gorm.DB {
 	return data.MainDB()
+}
+
+func RedisClient() *rediscache.CacheClient {
+	return rediscache.CacheClientInstance.Load()
 }

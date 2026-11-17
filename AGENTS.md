@@ -28,6 +28,7 @@
 
 - 编码前先阅读当前模块及同类功能的现有实现，遵循项目已有的代码风格、命名、结构、调用方式和错误处理习惯，优先沿用现有写法。未经用户要求，不按个人偏好引入新的实现风格或重构现有代码。
 - 代码尽量采用简单实现，减少不必要的抽象和复杂逻辑。
+- 错误处理优先采用简单、统一的返回方式。只有调用方确实需要分别处理时才细分错误，不为低概率异常额外定义错误类型、重复包装错误或堆叠分类返回分支。
 - 减少不必要的安全性校验。
 - 用户已经忽略的 error 处理，保持现有写法，不主动补充错误处理。
 - 没有特殊需求不要新增 `xxx_test.go`。
@@ -36,6 +37,8 @@
 - 不用判断 `req == nil`。
 - 命名简洁、明确，沿用所在包的风格，使用 `gofmt` 格式化修改过的 Go 文件。
 - controller 保持请求绑定和响应处理职责，业务逻辑放在 service，数据库操作放在 repo。
+- Bearer 凭证解析、接口鉴权和管理凭证校验放在中间件或协议入口，service 专注业务处理。
+- 通用鉴权中间件只处理凭证与通用权限参数，业务请求类型及业务字段绑定由 controller 负责。
 - service 优先使用已有的 proto 请求和响应类型。
 - 数据库及外部请求沿用调用方的 `context.Context`，HTTP 入口通过 `ctx.Request.Context()` 传入。
 - 沿用现有错误处理方式，service 对外错误使用 gRPC `codes` 和 `status`，HTTP 通过 `Controller.Response` 统一映射。
@@ -78,7 +81,7 @@ make run
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **payment-api** (830 symbols, 1561 relationships, 53 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **payment-api** (1459 symbols, 3285 relationships, 95 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > Index stale? Run `node .gitnexus/run.cjs analyze` from the project root — it auto-selects an available runner. No `.gitnexus/run.cjs` yet? `npx gitnexus analyze` (npm 11 crash → `npm i -g gitnexus`; #1939).
 
@@ -99,12 +102,12 @@ This project is indexed by GitNexus as **payment-api** (830 symbols, 1561 relati
 
 ## Resources
 
-| Resource                                     | Use for                                  |
-|----------------------------------------------|------------------------------------------|
-| `gitnexus://repo/payment-api/context`        | Codebase overview, check index freshness |
-| `gitnexus://repo/payment-api/clusters`       | All functional areas                     |
-| `gitnexus://repo/payment-api/processes`      | All execution flows                      |
-| `gitnexus://repo/payment-api/process/{name}` | Step-by-step execution trace             |
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/payment-api/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/payment-api/clusters` | All functional areas |
+| `gitnexus://repo/payment-api/processes` | All execution flows |
+| `gitnexus://repo/payment-api/process/{name}` | Step-by-step execution trace |
 
 ## CLI
 
@@ -118,3 +121,10 @@ This project is indexed by GitNexus as **payment-api** (830 symbols, 1561 relati
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+
+
+- 禁止过度参数校验，有必要的我会告诉你
+- 禁止过度使用事务，有必要的我会告诉你
+- 禁止过度防御
+- 代码要以简洁为主，从简单开始实现，降低代码耦合度，要容易拓展
