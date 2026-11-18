@@ -16,7 +16,7 @@ func New() *gin.Engine {
 	r.Use(gin.LoggerWithConfig(gin.LoggerConfig{SkipQueryString: true}), gin.CustomRecovery(func(ctx *gin.Context, recovered any) {
 		ctx.Abort()
 		controller.Response(ctx, nil, status.Error(codes.Internal, "服务内部错误"))
-	}))
+	}), middleware.RequestLogger())
 	r.NoRoute(func(ctx *gin.Context) {
 		controller.Response(ctx, nil, status.Error(codes.NotFound, "接口不存在"))
 	})

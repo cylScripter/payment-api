@@ -1,6 +1,7 @@
 package initials
 
 import (
+	"errors"
 	"payment-api/internal/service/merchant"
 	"payment-api/internal/service/notify"
 	"sync"
@@ -21,7 +22,9 @@ var (
 
 func Init(sources ...config.Source) error {
 	once.Do(func() {
-		InitLogger()
+		if initErr = InitLogger(); initErr != nil {
+			return
+		}
 		if initErr = config.Init(sources...); initErr != nil {
 			return
 		}
@@ -70,5 +73,5 @@ func Close() error {
 		stopAPIKeys()
 		stopAPIKeys = nil
 	}
-	return gormhelper.ClientInstance.Close()
+	return errors.Join(gormhelper.ClientInstance.Close(), logFile.Close())
 }
