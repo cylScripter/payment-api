@@ -38,7 +38,7 @@ type BusinessNotify struct {
 }
 
 var businessClient = &http.Client{
-	Timeout: 2 * time.Second,
+	Timeout: 5 * time.Second,
 	CheckRedirect: func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	},
@@ -83,7 +83,7 @@ func sendBusinessNotify(ctx context.Context, merchant models.PayMerchant, payloa
 		return fmt.Errorf("业务通知返回 HTTP %d", resp.StatusCode)
 	}
 	respBody, _ := io.ReadAll(resp.Body)
-	log.Infof("[BusinessNotify] 通知业务系统成功,req:%v resp%s", string(body), respBody)
+	log.Infof("[BusinessNotify] 通知业务系统成功,req: %v resp: %s", string(body), respBody)
 	return nil
 }
 

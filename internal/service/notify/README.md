@@ -18,7 +18,7 @@ HTTP 入口为 `POST /v1/wechat/pay/notify/:merchant_account`，RPC 入口为 `P
 
 ## 业务通知
 
-向 `pay_merchant.notify_url` 发送 HTTP POST，报文类型为 `application/json`。`pay_order.notify_url` 继续保存渠道回调地址。业务端以 HTTP 2xx 确认接收，单次 HTTP 请求超时为 2 秒。
+向 `pay_merchant.notify_url` 发送 HTTP POST，报文类型为 `application/json`。`pay_order.notify_url` 继续保存渠道回调地址。业务端以 HTTP 2xx 确认接收，单次 HTTP 请求超时为 5 秒。
 
 ```json
 {
