@@ -37,14 +37,14 @@ func NewReqOneMerchant(account string) *ReqOneMerchant {
 	return &ReqOneMerchant{account: account}
 }
 
-func (m *MerchantMysql) OneMerchant(ctx context.Context, req *ReqOneMerchant) models.PayMerchant {
+func (m *MerchantMysql) OneMerchant(ctx context.Context, req *ReqOneMerchant) (models.PayMerchant, error) {
 	var doc models.PayMerchant
 	db := m.db.WithContext(ctx).Clauses(dbresolver.Write).Model(&models.PayMerchant{})
 	if req.account != "" {
 		db = db.Where("account = ?", req.account)
 	}
 	db.First(&doc)
-	return doc
+	return doc, nil
 }
 
 type ReqNotifySecret struct {
@@ -72,15 +72,8 @@ func WithReqNotifySecretSecret(secret string) func(*ReqNotifySecret) {
 	}
 }
 
-func (m *MerchantMysql) NotifyMerchant(ctx context.Context, req ReqNotifySecret) (models.PayMerchant, error) {
-	var merchant models.PayMerchant
-	err := m.db.WithContext(ctx).Clauses(dbresolver.Write).
-		Where("account = ?", req.account).First(&merchant).Error
-	return merchant, err
-}
-
 func (m *MerchantMysql) InitNotifySecret(ctx context.Context, req ReqNotifySecret) (string, error) {
-	merchant, err := m.NotifyMerchant(ctx, req)
+	merchant, err := m.OneMerchant(ctx, NewReqOneMerchant(req.account))
 	if err != nil {
 		return "", err
 	}

@@ -16,7 +16,7 @@ import (
 // NotifySecret 初始化并返回商户回调密钥，重复执行复用已保存的密钥。
 func NotifySecret(ctx context.Context, account string) (string, error) {
 	mysql := repo.NewMerchantMysql(models.PayDb())
-	merchant, err := mysql.NotifyMerchant(ctx, repo.NewReqNotifySecret(repo.WithReqNotifySecretAccount(account)))
+	merchant, err := mysql.OneMerchant(ctx, repo.NewReqOneMerchant(account))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return "", status.Error(codes.NotFound, "商户不存在")
 	}

@@ -44,7 +44,7 @@ func NewWechatNotifier(req *paymentv1.WxPayNotifyReq) *WechatNotifier {
 
 func (n *WechatNotifier) LoadConfig(ctx context.Context) error {
 	merchantMysql := repo.NewMerchantMysql(models.PayDb())
-	n.merchant = merchantMysql.OneMerchant(ctx, repo.NewReqOneMerchant(n.request.MerchantAccount))
+	n.merchant, _ = merchantMysql.OneMerchant(ctx, repo.NewReqOneMerchant(n.request.MerchantAccount))
 	if n.merchant.ID == 0 {
 		return errors.New("merchant not found")
 	}
