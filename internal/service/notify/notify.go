@@ -24,11 +24,13 @@ func Handle(ctx context.Context, notifier Notifier) error {
 	}
 	for _, step := range steps {
 		if err := step(ctx); err != nil {
+			log.Infof("[Notify] 处理回调通知失败: %v", err)
 			return err
 		}
 	}
 	if err := notifier.NotifyBusiness(ctx); err != nil {
 		log.WithContext(ctx).WithError(err).Error("业务通知失败，等待后台重试")
 	}
+
 	return nil
 }

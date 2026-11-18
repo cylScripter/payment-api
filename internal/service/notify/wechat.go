@@ -22,23 +22,25 @@ import (
 )
 
 type WechatNotifier struct {
-	request      *paymentv1.WxPayNotifyReq
-	mysql        *repo.PayMysql
-	config       models.WeChatPayConfig
-	transaction  payments.Transaction
-	order        *models.PayOrder
-	verifyStatus string
+	request        *paymentv1.WxPayNotifyReq
+	skipVerifyTime bool
+	mysql          *repo.PayMysql
+	config         models.WeChatPayConfig
+	transaction    payments.Transaction
+	order          *models.PayOrder
+	verifyStatus   string
 
 	merchant models.PayMerchant
 }
 
 var _ Notifier = (*WechatNotifier)(nil)
 
-func NewWechatNotifier(req *paymentv1.WxPayNotifyReq) *WechatNotifier {
+func NewWechatNotifier(req *paymentv1.WxPayNotifyReq, skip bool) *WechatNotifier {
 	return &WechatNotifier{
-		request:      req,
-		mysql:        repo.NewPayMysql(models.PayDb()),
-		verifyStatus: models.PayStatusPending,
+		skipVerifyTime: skip,
+		request:        req,
+		mysql:          repo.NewPayMysql(models.PayDb()),
+		verifyStatus:   models.PayStatusPending,
 	}
 }
 
@@ -70,10 +72,18 @@ func (n *WechatNotifier) VerifyAndDecrypt(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = notifyHandler.Parse(ctx, request, &result)
-	if err != nil {
-		return err
+	if n.skipVerifyTime {
+		err = notifyHandler.Parse(ctx, request, &result)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = notifyHandler.ParseWithoutTimeCheck(ctx, request, &result)
+		if err != nil {
+			return err
+		}
 	}
+
 	n.transaction = result.Transaction
 	n.verifyStatus = models.PayStatusSuccess
 	return nil

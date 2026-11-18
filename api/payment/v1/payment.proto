@@ -9,6 +9,7 @@ option go_package = "payment-api/api/payment/v1;paymentv1";
 service PaymentService {
   rpc CreateOrder(CreateOrderReq) returns (CreateOrderResp) {}
   rpc WxPayNotify(WxPayNotifyReq) returns (WxPayNotifyResp) {} // 微信支付回调
+  rpc ReissueWxPayNotify(WxPayNotifyReq) returns (WxPayNotifyResp) {} // 补发支付回调
 }
 message WxPayNotifyReq {
   string merchant_account = 1; // 从回调地址获取

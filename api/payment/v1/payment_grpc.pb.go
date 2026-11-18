@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PaymentService_CreateOrder_FullMethodName = "/payment.payment.v1.PaymentService/CreateOrder"
-	PaymentService_WxPayNotify_FullMethodName = "/payment.payment.v1.PaymentService/WxPayNotify"
+	PaymentService_CreateOrder_FullMethodName        = "/payment.payment.v1.PaymentService/CreateOrder"
+	PaymentService_WxPayNotify_FullMethodName        = "/payment.payment.v1.PaymentService/WxPayNotify"
+	PaymentService_ReissueWxPayNotify_FullMethodName = "/payment.payment.v1.PaymentService/ReissueWxPayNotify"
 )
 
 // PaymentServiceClient is the client API for PaymentService service.
@@ -29,6 +30,7 @@ const (
 type PaymentServiceClient interface {
 	CreateOrder(ctx context.Context, in *CreateOrderReq, opts ...grpc.CallOption) (*CreateOrderResp, error)
 	WxPayNotify(ctx context.Context, in *WxPayNotifyReq, opts ...grpc.CallOption) (*WxPayNotifyResp, error)
+	ReissueWxPayNotify(ctx context.Context, in *WxPayNotifyReq, opts ...grpc.CallOption) (*WxPayNotifyResp, error)
 }
 
 type paymentServiceClient struct {
@@ -59,12 +61,23 @@ func (c *paymentServiceClient) WxPayNotify(ctx context.Context, in *WxPayNotifyR
 	return out, nil
 }
 
+func (c *paymentServiceClient) ReissueWxPayNotify(ctx context.Context, in *WxPayNotifyReq, opts ...grpc.CallOption) (*WxPayNotifyResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(WxPayNotifyResp)
+	err := c.cc.Invoke(ctx, PaymentService_ReissueWxPayNotify_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PaymentServiceServer is the server API for PaymentService service.
 // All implementations must embed UnimplementedPaymentServiceServer
 // for forward compatibility.
 type PaymentServiceServer interface {
 	CreateOrder(context.Context, *CreateOrderReq) (*CreateOrderResp, error)
 	WxPayNotify(context.Context, *WxPayNotifyReq) (*WxPayNotifyResp, error)
+	ReissueWxPayNotify(context.Context, *WxPayNotifyReq) (*WxPayNotifyResp, error)
 	mustEmbedUnimplementedPaymentServiceServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedPaymentServiceServer) CreateOrder(context.Context, *CreateOrd
 }
 func (UnimplementedPaymentServiceServer) WxPayNotify(context.Context, *WxPayNotifyReq) (*WxPayNotifyResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method WxPayNotify not implemented")
+}
+func (UnimplementedPaymentServiceServer) ReissueWxPayNotify(context.Context, *WxPayNotifyReq) (*WxPayNotifyResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ReissueWxPayNotify not implemented")
 }
 func (UnimplementedPaymentServiceServer) mustEmbedUnimplementedPaymentServiceServer() {}
 func (UnimplementedPaymentServiceServer) testEmbeddedByValue()                        {}
@@ -138,6 +154,24 @@ func _PaymentService_WxPayNotify_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PaymentService_ReissueWxPayNotify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WxPayNotifyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PaymentServiceServer).ReissueWxPayNotify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PaymentService_ReissueWxPayNotify_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PaymentServiceServer).ReissueWxPayNotify(ctx, req.(*WxPayNotifyReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PaymentService_ServiceDesc is the grpc.ServiceDesc for PaymentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var PaymentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "WxPayNotify",
 			Handler:    _PaymentService_WxPayNotify_Handler,
+		},
+		{
+			MethodName: "ReissueWxPayNotify",
+			Handler:    _PaymentService_ReissueWxPayNotify_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

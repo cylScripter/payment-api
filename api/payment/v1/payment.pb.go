@@ -828,10 +828,11 @@ const file_api_payment_v1_payment_proto_rawDesc = "" +
 	"\x14AlipayJSAPIPayParams\x12\x19\n" +
 	"\btrade_no\x18\x01 \x01(\tR\atradeNO\"8\n" +
 	"\x12AlipayAppPayParams\x12\"\n" +
-	"\forder_string\x18\x01 \x01(\tR\forder_string2\xc4\x01\n" +
+	"\forder_string\x18\x01 \x01(\tR\forder_string2\xa5\x02\n" +
 	"\x0ePaymentService\x12X\n" +
 	"\vCreateOrder\x12\".payment.payment.v1.CreateOrderReq\x1a#.payment.payment.v1.CreateOrderResp\"\x00\x12X\n" +
-	"\vWxPayNotify\x12\".payment.payment.v1.WxPayNotifyReq\x1a#.payment.payment.v1.WxPayNotifyResp\"\x00B&Z$payment-api/api/payment/v1;paymentv1b\x06proto3"
+	"\vWxPayNotify\x12\".payment.payment.v1.WxPayNotifyReq\x1a#.payment.payment.v1.WxPayNotifyResp\"\x00\x12_\n" +
+	"\x12ReissueWxPayNotify\x12\".payment.payment.v1.WxPayNotifyReq\x1a#.payment.payment.v1.WxPayNotifyResp\"\x00B&Z$payment-api/api/payment/v1;paymentv1b\x06proto3"
 
 var (
 	file_api_payment_v1_payment_proto_rawDescOnce sync.Once
@@ -866,10 +867,12 @@ var file_api_payment_v1_payment_proto_depIdxs = []int32{
 	12, // 1: payment.payment.v1.CreateOrderResp.pay_params:type_name -> google.protobuf.Struct
 	2,  // 2: payment.payment.v1.PaymentService.CreateOrder:input_type -> payment.payment.v1.CreateOrderReq
 	0,  // 3: payment.payment.v1.PaymentService.WxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
-	3,  // 4: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
-	1,  // 5: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
-	4,  // [4:6] is the sub-list for method output_type
-	2,  // [2:4] is the sub-list for method input_type
+	0,  // 4: payment.payment.v1.PaymentService.ReissueWxPayNotify:input_type -> payment.payment.v1.WxPayNotifyReq
+	3,  // 5: payment.payment.v1.PaymentService.CreateOrder:output_type -> payment.payment.v1.CreateOrderResp
+	1,  // 6: payment.payment.v1.PaymentService.WxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
+	1,  // 7: payment.payment.v1.PaymentService.ReissueWxPayNotify:output_type -> payment.payment.v1.WxPayNotifyResp
+	5,  // [5:8] is the sub-list for method output_type
+	2,  // [2:5] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name

@@ -82,6 +82,7 @@ func sendBusinessNotify(ctx context.Context, merchant models.PayMerchant, payloa
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return fmt.Errorf("业务通知返回 HTTP %d", resp.StatusCode)
 	}
+	log.Infof("[BusinessNotify] 通知业务系统成功: %v", resp.Body)
 	return nil
 }
 

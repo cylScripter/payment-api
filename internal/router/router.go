@@ -32,6 +32,7 @@ func New() *gin.Engine {
 	public := r.Group("/payment-api/v1")
 	wechatG := public.Group("/wechat")
 	wechatG.Any("/pay/notify/:merchant_account", payC.WxPayNotify)
+	wechatG.POST("/reissue/pay/notify", payC.ReissueWxPayNotify)
 	wechatG.POST("/auth/login", controller.WechatLogin)
 
 	// 商户接口
