@@ -3,10 +3,18 @@ package notify
 import (
 	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"payment-api/internal/config"
+	"payment-api/internal/models"
+	"payment-api/internal/pkg/helpers"
+	"strconv"
 	"time"
 
 	"payment-api/internal/repo"
@@ -36,16 +44,31 @@ var businessClient = &http.Client{
 	},
 }
 
-func sendBusinessNotify(ctx context.Context, notifyURL string, payload *BusinessNotify) error {
+func sendBusinessNotify(ctx context.Context, merchant models.PayMerchant, payload *BusinessNotify) error {
+	if merchant.NotifySecret == "" {
+		return errors.New("商户未配置回调密钥")
+	}
+	secret, err := helpers.DecryptPEMString(merchant.NotifySecret, []byte(config.Get().EncryptKey))
+	if err != nil || secret == "" {
+		return errors.New("解密商户回调密钥失败")
+	}
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, notifyURL, bytes.NewReader(body))
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte("v1\n" + timestamp + "\n"))
+	mac.Write(body)
+	mac.Write([]byte("\n"))
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, merchant.NotifyURL, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Pay-Timestamp", timestamp)
+	req.Header.Set("X-Pay-Signature", "v1="+hex.EncodeToString(mac.Sum(nil)))
 	resp, err := businessClient.Do(req)
 	if err != nil {
 		return err

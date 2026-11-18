@@ -11,3 +11,7 @@
 .gitnexus
 /configs/
 .agents/
+*.exe
+*.test
+*.out
+vendor/

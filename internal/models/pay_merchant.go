@@ -8,16 +8,17 @@ import (
 )
 
 type PayMerchant struct {
-	ID         int64     `json:"id" gorm:"column:id;primary_key"`
-	CreateTime time.Time `json:"create_time" gorm:"column:create_time;not null;autoCreateTime"` // 本地入库时间
-	UpdateTime time.Time `json:"update_time" gorm:"column:update_time;not null;autoUpdateTime"`
-	Name       string    `json:"name" gorm:"column:name;not null"`             // 商户名称
-	Account    string    `json:"account" gorm:"column:account;not null"`       // 商户账号
-	Type       int64     `json:"type" gorm:"column:type;not null"`             // 商户类型：1业务商户 2平台商户
-	Status     int64     `json:"status" gorm:"column:status;not null"`         // 状态：1正常 2禁用
-	NotifyURL  string    `json:"notify_url" gorm:"column:notify_url;not null"` // 通知地址
-	ReturnUrl  string    `json:"return_url" gorm:"column:return_url;not null"` // 回调地址
-	Remark     string    `json:"remark" gorm:"column:remark;"`                 // 备注
+	ID           int64     `json:"id" gorm:"column:id;primary_key"`
+	CreateTime   time.Time `json:"create_time" gorm:"column:create_time;not null;autoCreateTime"` // 本地入库时间
+	UpdateTime   time.Time `json:"update_time" gorm:"column:update_time;not null;autoUpdateTime"`
+	Name         string    `json:"name" gorm:"column:name;not null"`                                    // 商户名称
+	Account      string    `json:"account" gorm:"column:account;not null"`                              // 商户账号
+	Type         int64     `json:"type" gorm:"column:type;not null"`                                    // 商户类型：1业务商户 2平台商户
+	Status       int64     `json:"status" gorm:"column:status;not null"`                                // 状态：1正常 2禁用
+	NotifyURL    string    `json:"notify_url" gorm:"column:notify_url;not null"`                        // 通知地址
+	NotifySecret string    `json:"-" gorm:"column:notify_secret;type:varchar(512);not null;default:''"` // 回调密钥密文
+	ReturnUrl    string    `json:"return_url" gorm:"column:return_url;not null"`                        // 回调地址
+	Remark       string    `json:"remark" gorm:"column:remark;"`                                        // 备注
 }
 
 func (PayMerchant) TableName() string { return "pay_merchant" }

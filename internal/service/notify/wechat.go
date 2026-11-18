@@ -44,7 +44,7 @@ func NewWechatNotifier(req *paymentv1.WxPayNotifyReq) *WechatNotifier {
 
 func (n *WechatNotifier) LoadConfig(ctx context.Context) error {
 	merchantMysql := repo.NewMerchantMysql(models.PayDb())
-	n.merchant = merchantMysql.OneMerchant(repo.NewReqOneMerchant(n.request.MerchantAccount))
+	n.merchant = merchantMysql.OneMerchant(ctx, repo.NewReqOneMerchant(n.request.MerchantAccount))
 	if n.merchant.ID == 0 {
 		return errors.New("merchant not found")
 	}
@@ -148,7 +148,7 @@ func (n *WechatNotifier) NotifyBusiness(ctx context.Context) error {
 	if n.transaction.TradeType != nil {
 		payload.TradeType = *n.transaction.TradeType
 	}
-	if err := sendBusinessNotify(ctx, n.merchant.NotifyURL, payload); err != nil {
+	if err := sendBusinessNotify(ctx, n.merchant, payload); err != nil {
 		return err
 	}
 	return n.mysql.UpdateNotifyStatus(ctx, order.PayNo, models.BusinessNotifySuccess)

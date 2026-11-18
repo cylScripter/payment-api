@@ -6,6 +6,8 @@
 
 接入前由支付服务提供对应环境的服务地址、商户账号 `account` 和 API Key，并开通商户需要使用的支付渠道及应用。
 
+商户同时取得独立的回调密钥 `notify_secret`，保存到商户后端，用于验证支付成功通知。API Key 用于商户请求支付服务，`notify_secret` 用于商户验证回调，两者分别管理。验签时根据约定的商户账号使用对应回调密钥。
+
 商户提供支付成功回调地址，由支付服务完成配置。示例服务地址使用 `https://pay.example.com`，商户回调地址使用 `https://merchant.example.com/payment/notify`。
 
 基本流程如下。
@@ -14,7 +16,7 @@
 2. 保存响应中的支付单号 `data.outTradeNo`，关联业务订单号 `order_no`。
 3. 将 `data.payParams` 交给对应客户端调起支付。
 4. 支付成功后，支付服务向商户提供的回调地址发送支付结果。
-5. 业务后端根据回调中的订单号和金额处理业务，并返回 HTTP 2xx。
+5. 业务后端校验时间戳和签名，核对订单号及金额，幂等处理业务后返回 HTTP 200 或 204。
 
 ## 创建订单
 
@@ -238,7 +240,14 @@ HTTP 状态码为 `200`，`code` 为 `0`。
 ```http
 POST https://merchant.example.com/payment/notify
 Content-Type: application/json
+X-Pay-Timestamp: 1794967200
+X-Pay-Signature: v1=<64个小写十六进制字符>
 ```
+
+| 请求头               | 说明                               |
+|-------------------|----------------------------------|
+| `X-Pay-Timestamp` | 本次投递的秒级 Unix 时间戳，十进制字符串          |
+| `X-Pay-Signature` | `v1=` 加 HMAC-SHA256 签名的小写十六进制字符串 |
 
 ### 回调参数
 
@@ -276,11 +285,92 @@ Content-Type: application/json
 }
 ```
 
+### 签名规则
+
+签名使用商户的 `notify_secret` 字符串 UTF-8 字节作为密钥，按以下顺序拼接待签名内容。
+
+```text
+message = "v1\n" + timestamp + "\n" + 原始请求体 + "\n"
+signature = hex(HMAC-SHA256(UTF8(notify_secret), message))
+X-Pay-Signature = "v1=" + signature
+```
+
+`timestamp` 使用请求头 `X-Pay-Timestamp` 的原始文本，`\n` 为单个换行字节，末尾换行参与签名。商户读取收到的原始请求体完成验签，验签通过后再解析 JSON。
+
+### 商户验签示例
+
+以下 Go 示例返回通过验证的原始请求体。调用时传入商户后端保存的回调密钥和 `time.Now()`。
+
+```go
+package merchant
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
+	"io"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+)
+
+func VerifyNotify(req *http.Request, secret string, now time.Time) ([]byte, error) {
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return nil, err
+	}
+	timestamp := req.Header.Get("X-Pay-Timestamp")
+	seconds, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil || seconds < now.Unix()-300 || seconds > now.Unix()+300 {
+		return nil, errors.New("通知时间无效")
+	}
+	encoded, ok := strings.CutPrefix(req.Header.Get("X-Pay-Signature"), "v1=")
+	if !ok {
+		return nil, errors.New("签名版本无效")
+	}
+	actual, err := hex.DecodeString(encoded)
+	if err != nil {
+		return nil, errors.New("签名格式错误")
+	}
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte("v1\n" + timestamp + "\n"))
+	mac.Write(body)
+	mac.Write([]byte("\n"))
+	if !hmac.Equal(actual, mac.Sum(nil)) {
+		return nil, errors.New("签名错误")
+	}
+	return body, nil
+}
+```
+
+时间戳与商户当前时间相差不超过 300 秒时满足时效要求，前后相差 301 秒的通知应被拒绝。平台与商户均需维护准确时钟。
+
+验签通过后解析返回的请求体，核对 `merchant_account`、`order_no`、`total_amount` 与业务订单。核对通过后按 `out_trade_no` 幂等处理。签名、时效或业务核对失败时返回 HTTP 非 2xx 状态码。
+
+### 签名核对示例
+
+以下使用虚构密钥 `notify_demo_secret_20261118` 和固定时间戳 `1794967200`。原始请求体为以下 305 字节的单行文本，报文本身末尾无换行。
+
+```json
+{"out_trade_no":"123456789012345678","order_no":"ORDER202611180001","merchant_account":"merchant_demo","trade_no":"4200000000000000000000000000","channel":"wechat","status":"SUCCESS","total_amount":1250,"pay_amount":1250,"pay_time":"2026-11-18T10:00:00+08:00","open_id":"openid_demo","trade_type":"JSAPI"}
+```
+
+期望签名头如下。
+
+```http
+X-Pay-Signature: v1=63aa64de9e6903085056f9147bc3ca589af80768e4295317eaa2b861038d193a
+```
+
+此示例用于核对签名计算，固定接收时间可使用 `time.Unix(1794967200, 0)`。实际请求使用当前投递时间。
+
 ### 接收应答与重复通知
 
-- 业务端处理成功后返回 HTTP `200` 或 `204` 等任意 `2xx` 状态码，响应体可为空，支付服务根据 HTTP 状态码确认投递结果。
+- 业务端处理成功后返回 HTTP `200` 或 `204`，响应体可为空，支付服务根据 HTTP 状态码确认投递结果。
 - 单次通知请求超时为 2 秒，`3xx` 跳转和其余非 `2xx` 状态码均按投递失败处理。
-- 同一支付结果可能重复通知，商户按 `out_trade_no` 幂等处理，重复通知应返回成功应答。
+- 同一支付结果可能重复或并发通知，商户按 `out_trade_no` 幂等处理，确保同一支付单的业务效果累计为一次。已处理成功的有效重复通知返回 HTTP `200` 或 `204`。
+- 每次重新投递时，支付服务重新读取当前时间并计算签名。`X-Pay-Timestamp` 为本次投递时间，`pay_time` 为原支付成功时间，业务关联使用原支付单号。同一秒内的相同报文可能得到相同签名。
 - 回调接收异常或支付成功后长时间未收到回调时，请联系支付服务核实支付结果和通知情况。
 
 成功应答示例如下。

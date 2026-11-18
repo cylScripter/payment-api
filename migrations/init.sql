@@ -42,6 +42,7 @@ CREATE TABLE `pay_merchant` (
     `type`        BIGINT        NOT NULL COMMENT '商户类型：1业务商户 2平台商户',
     `status`      BIGINT        NOT NULL COMMENT '状态：1正常 2禁用',
     `notify_url`  VARCHAR(2048) NOT NULL COMMENT '通知地址',
+    `notify_secret` VARCHAR(512) NOT NULL DEFAULT '' COMMENT '商户回调密钥密文',
     `return_url`  VARCHAR(2048) NOT NULL COMMENT '回调地址',
     `remark`      VARCHAR(512)  DEFAULT NULL COMMENT '备注',
     PRIMARY KEY (`id`)
