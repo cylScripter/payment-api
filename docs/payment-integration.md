@@ -2,21 +2,33 @@
 
 本文说明商户创建订单和接收支付成功回调的对接方式。创建订单支持微信、支付宝、抖音支付，业务回调目前支持微信支付。
 
-## 接入准备
+## 商户信息
 
-接入前由支付服务提供对应环境的服务地址、商户账号 `account` 和 API Key，并开通商户需要使用的支付渠道及应用。
+本次接入使用以下商户信息。
 
-商户同时取得独立的回调密钥 `notify_secret`，保存到商户后端，用于验证支付成功通知。API Key 用于商户请求支付服务，`notify_secret` 用于商户验证回调，两者分别管理。验签时根据约定的商户账号使用对应回调密钥。
+| 配置项 | 配置值 | 用途 |
+| --- | --- | --- |
+| 商户号 `account` | `2611140001` | 创建订单时填写，用于标识商户。 |
+| 接口密钥 `api_key` | `sk-25a772a1bda615000fc1e5bbc97c8c3c` | 商户后端请求支付服务时，放入 `Authorization: Bearer <API_KEY>`。 |
+| 回调密钥 `notify_secret` | `c219fe39c112e88478e63f537d831e3b` | 商户后端验证支付成功通知的签名。 |
 
-商户提供支付成功回调地址，由支付服务完成配置。示例服务地址使用 `https://pay.example.com`，商户回调地址使用 `https://merchant.example.com/payment/notify`。
+API Key 和回调密钥分别保存在商户后端。验签时使用上表中的 `notify_secret`。
 
-基本流程如下。
+## 接入前准备
 
-1. 业务后端携带商户 API Key 调用创建订单接口。
-2. 保存响应中的支付单号 `data.outTradeNo`，关联业务订单号 `order_no`。
-3. 将 `data.payParams` 交给对应客户端调起支付。
-4. 支付成功后，支付服务向商户提供的回调地址发送支付结果。
-5. 业务后端校验时间戳和签名，核对订单号及金额，幂等处理业务后返回 HTTP 200 或 204。
+1. 向对接人员取得对应环境的支付服务地址，并确认已开通所需支付渠道及应用。
+2. 提供商户的支付成功回调地址，由支付服务完成配置。
+3. 在商户后端配置上表中的商户号、接口密钥和回调密钥。
+
+下文以 `https://pay.example.com` 为支付服务地址，以 `https://merchant.example.com/payment/notify` 为商户回调地址。接入时替换为双方确认的实际地址。
+
+## 接入流程
+
+1. **创建订单**。业务后端携带 API Key 调用创建订单接口。
+2. **关联业务订单**。保存响应中的支付单号 `data.outTradeNo`，关联业务订单号 `order_no`。
+3. **调起支付**。将 `data.payParams` 交给对应客户端调起支付。
+4. **接收通知**。支付成功后，支付服务向商户配置的回调地址发送支付结果。
+5. **确认处理结果**。业务后端校验时间戳和签名，核对订单号及金额，幂等处理业务后返回 HTTP 200 或 204。
 
 ## 创建订单
 
@@ -28,7 +40,7 @@ Content-Type: application/json
 Authorization: Bearer <API_KEY>
 ```
 
-API Key 所属商户必须与请求中的 `account` 一致。API Key 由业务后端保存并用于请求支付服务。
+请求中的 `account` 填写上表的商户号，`<API_KEY>` 替换为上表的 `api_key`。API Key 由业务后端保存并用于请求支付服务。
 
 ### 请求参数
 
@@ -60,7 +72,7 @@ curl --request POST 'https://pay.example.com/merchant-api/v1/create/order' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer <API_KEY>' \
   --data '{
-    "account": "merchant_demo",
+    "account": "2611140001",
     "order_no": "ORDER202611180001",
     "description": "商品订单支付",
     "amount": 12.50,
@@ -75,7 +87,7 @@ curl --request POST 'https://pay.example.com/merchant-api/v1/create/order' \
 
 ```json
 {
-  "account": "merchant_demo",
+  "account": "2611140001",
   "order_no": "ORDER202611180002",
   "description": "商品订单支付",
   "amount": 12.50,
@@ -273,7 +285,7 @@ X-Pay-Signature: v1=<64个小写十六进制字符>
 {
   "out_trade_no": "123456789012345678",
   "order_no": "ORDER202611180001",
-  "merchant_account": "merchant_demo",
+  "merchant_account": "2611140001",
   "trade_no": "4200000000000000000000000000",
   "channel": "wechat",
   "status": "SUCCESS",
@@ -351,16 +363,16 @@ func VerifyNotify(req *http.Request, secret string, now time.Time) ([]byte, erro
 
 ### 签名核对示例
 
-以下使用虚构密钥 `notify_demo_secret_20261118` 和固定时间戳 `1794967200`。原始请求体为以下 305 字节的单行文本，报文本身末尾无换行。
+以下使用上方“商户信息”中的 `notify_secret` 和固定时间戳 `1794967200`。原始请求体为以下 302 字节的单行文本，报文本身末尾无换行。
 
 ```json
-{"out_trade_no":"123456789012345678","order_no":"ORDER202611180001","merchant_account":"merchant_demo","trade_no":"4200000000000000000000000000","channel":"wechat","status":"SUCCESS","total_amount":1250,"pay_amount":1250,"pay_time":"2026-11-18T10:00:00+08:00","open_id":"openid_demo","trade_type":"JSAPI"}
+{"out_trade_no":"123456789012345678","order_no":"ORDER202611180001","merchant_account":"2611140001","trade_no":"4200000000000000000000000000","channel":"wechat","status":"SUCCESS","total_amount":1250,"pay_amount":1250,"pay_time":"2026-11-18T10:00:00+08:00","open_id":"openid_demo","trade_type":"JSAPI"}
 ```
 
 期望签名头如下。
 
 ```http
-X-Pay-Signature: v1=63aa64de9e6903085056f9147bc3ca589af80768e4295317eaa2b861038d193a
+X-Pay-Signature: v1=d7f3740ec095ce8b5115a09082ec7d91c71e1ed285399da17ac8dda8a3e48165
 ```
 
 此示例用于核对签名计算，固定接收时间可使用 `time.Unix(1794967200, 0)`。实际请求使用当前投递时间。
