@@ -3,6 +3,7 @@
 exec python3 - "$(dirname "$0")/logs" "$@" <<'PY'
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -13,6 +14,29 @@ parser = argparse.ArgumentParser(description="按日期和关键词查询日志"
 parser.add_argument("date", help="日期，例如 20261118")
 parser.add_argument("keyword", nargs="?", default="", help="关键词，省略时查看当天全部日志")
 args = parser.parse_args()
+use_color = sys.stdout.isatty()
+level_colors = {
+    "TRACE": "90",
+    "DEBUG": "90",
+    "INFO": "32",
+    "WARN": "33",
+    "WARNING": "33",
+    "ERROR": "31",
+    "FATAL": "1;31",
+    "PANIC": "1;31",
+}
+
+
+def style(text, code=""):
+    text = str(text)
+    if not use_color:
+        return text
+    prefix = f"\033[{code}m" if code else ""
+    if args.keyword:
+        highlight = f"\033[1;33m{args.keyword}\033[0m{prefix}"
+        text = text.replace(args.keyword, highlight)
+    return f"{prefix}{text}\033[0m"
+
 
 try:
     date = datetime.strptime(args.date.replace("-", ""), "%Y%m%d").strftime("%Y-%m-%d")
@@ -51,10 +75,14 @@ for path in files:
                 message = record.pop("msg", "")
                 method = record.pop("method", "")
                 request_path = record.pop("path", "")
-                parts = [f"{timestamp} [{level}] [{container_ip}]"]
+                parts = [
+                    f"{style(timestamp, '90')} "
+                    f"{style(f'[{level}]', level_colors.get(level, '37'))} "
+                    f"{style(f'[{container_ip}]', '1;34')}"
+                ]
                 if method or request_path:
-                    parts.append(f"{method} {request_path}".strip())
-                parts.append(str(message).replace("\r", r"\r").replace("\n", r"\n"))
+                    parts.append(f"{style(method, '36')} {style(request_path)}".strip())
+                parts.append(style(str(message).replace("\r", r"\r").replace("\n", r"\n")))
                 for key, value in record.items():
                     if key == "query" and isinstance(value, str):
                         value = unquote_plus(value)
@@ -62,12 +90,18 @@ for path in files:
                         continue
                     if isinstance(value, str):
                         value = value.replace("\r", r"\r").replace("\n", r"\n")
+                        value_color = "90" if key in ("file", "func") else ""
+                        value = style(value, value_color)
                     else:
                         value = json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-                    parts.append(f"{key}={value}")
-                print(" | ".join(parts))
+                        segments = re.split(r'("(?:\\.|[^"\\])*")(?=\s*:)', value)
+                        for index, segment in enumerate(segments):
+                            segments[index] = style(segment, "1;34" if index % 2 else "")
+                        value = "".join(segments)
+                    parts.append(f"{style(key, '1;34')}={value}")
+                print(style(" | ", "90").join(parts))
             else:
-                print(line.rstrip("\n"))
+                print(style(line.rstrip("\n")))
 
 if not matched:
     sys.exit("没有匹配的日志")

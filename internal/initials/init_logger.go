@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mattn/go-isatty"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -54,11 +55,14 @@ func InitLogger() error {
 	if err := logFile.rotate(time.Now().Format("2006-01-02")); err != nil {
 		return err
 	}
-	log.SetOutput(io.MultiWriter(os.Stderr, &logFile))
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, &logFile)
-	gin.DefaultErrorWriter = io.MultiWriter(os.Stderr, &logFile)
+	log.SetOutput(io.MultiWriter(consoleWriter{
+		ip:    logFile.ip,
+		color: isatty.IsTerminal(os.Stderr.Fd()),
+	}, &logFile))
 
 	writer := logWriter{level: log.InfoLevel}
+	gin.DefaultWriter = writer
+	gin.DefaultErrorWriter = logWriter{level: log.ErrorLevel}
 	stdlog.SetFlags(0)
 	stdlog.SetPrefix("")
 	stdlog.SetOutput(writer)
