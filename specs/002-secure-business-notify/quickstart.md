@@ -87,7 +87,7 @@ curl --silent --show-error --output "$NOTIFY_CHECK_DIR/response.txt" --write-out
 CONFIG_PATH=/path/to/test-config.yaml go run ./cmd/server
 ```
 
-在测试环境按照 [商户对接文档](../../docs/payment-integration.md) 调用 `POST /merchant-api/v1/create/order`，完成一笔授权测试支付，核对以下结果。
+在测试环境按照 [商户对接文档](../../docs/商户支付接口.md) 调用 `POST /merchant-api/v1/create/order`，完成一笔授权测试支付，核对以下结果。
 
 1. 捕获商户接收端收到的两个签名头及原始 body，按实际商户密钥计算签名，结果与请求头一致。
 2. 回调 `out_trade_no` 等于下单响应 `data.outTradeNo`，`order_no` 与商户业务订单一致，`total_amount` 等于下单元金额换算后的整数分。

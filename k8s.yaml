@@ -20,10 +20,18 @@ spec:
         kubernetes.io/arch: amd64
       imagePullSecrets:
         - name: registry-secret
+      volumes:
+        - name: logs
+          hostPath:
+            path: /var/log/payment-api
+            type: DirectoryOrCreate
       containers:
         - name: payment-api
-          image: 114.132.181.123:50000/open/payment-api:v20261118-223155-main
+          image: 114.132.181.123:50000/open/payment-api:v20261119-013544-main
           imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
           ports:
             - name: http
               containerPort: 8080

@@ -26,6 +26,7 @@ func New() *gin.Engine {
 	// 对外接口
 	payC := controllers.PaymentController{}
 	openPay := r.Group("/open-pay/v1")
+	openPay.Use(middleware.Auth(controller.Response, true))
 	openPay.POST("/create/order", payC.CreateOrder)
 
 	// 微信
